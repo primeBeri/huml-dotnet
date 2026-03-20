@@ -5,7 +5,7 @@ namespace Huml.Net.Versioning;
 /// </summary>
 public enum UnknownVersionBehaviour
 {
-    /// <summary>Throw <c>HumlUnsupportedVersionException</c>.</summary>
+    /// <summary>Throw <see cref="Exceptions.HumlUnsupportedVersionException"/>.</summary>
     Throw,
 
     /// <summary>Silently use the latest supported version.</summary>
