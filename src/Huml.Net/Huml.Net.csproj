@@ -19,4 +19,7 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.201" PrivateAssets="All" />
     <PackageReference Include="MinVer" Version="7.0.0" PrivateAssets="All" />
   </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Huml.Net.Tests" />
+  </ItemGroup>
 </Project>
