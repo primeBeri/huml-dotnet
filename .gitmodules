@@ -1,0 +1,6 @@
+[submodule "fixtures/v0.1"]
+	path = fixtures/v0.1
+	url = https://github.com/huml-lang/tests
+[submodule "fixtures/v0.2"]
+	path = fixtures/v0.2
+	url = https://github.com/huml-lang/tests
