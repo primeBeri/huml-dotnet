@@ -51,12 +51,11 @@ internal sealed class HumlParser
     /// </summary>
     /// <param name="source">The HUML document text to parse.</param>
     /// <param name="options">Options controlling spec-version behaviour.</param>
-    /// <param name="maxDepth">Maximum recursion depth before throwing (PARS-05 guard).</param>
-    internal HumlParser(string source, HumlOptions options, int maxDepth = 512)
+    internal HumlParser(string source, HumlOptions options)
     {
         _lexer = new Lexer.Lexer(source, options);
         _options = options;
-        _maxDepth = maxDepth;
+        _maxDepth = options.MaxRecursionDepth;
         _lookahead = _lexer.NextToken(); // prime lookahead
     }
 

@@ -27,4 +27,11 @@ public sealed class HumlOptions
     /// <summary>Behaviour when an unsupported version is declared in the document header.</summary>
     public UnknownVersionBehaviour UnknownVersionBehaviour { get; init; }
         = UnknownVersionBehaviour.Throw;
+
+    /// <summary>
+    /// Maximum recursion depth allowed during parsing. Exceeding this limit throws
+    /// <see cref="Huml.Net.Exceptions.HumlParseException"/> instead of risking an unrecoverable
+    /// <see cref="StackOverflowException"/>. Default is 512.
+    /// </summary>
+    public int MaxRecursionDepth { get; init; } = 512;
 }
