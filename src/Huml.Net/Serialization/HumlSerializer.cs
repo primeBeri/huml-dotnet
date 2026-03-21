@@ -234,6 +234,11 @@ internal static class HumlSerializer
         }
 
         // POCO object (not null — null was handled by IsScalarValue)
+        var valueType = value!.GetType();
+        if (IsUnsupportedType(valueType))
+            throw new HumlSerializeException(
+                $"Cannot serialize type '{valueType.FullName}': delegates, function pointers, and " +
+                "similar non-data types are not supported by HumlSerializer.");
         sb.Append(indent);
         sb.Append(key);
         sb.Append("::\n");
@@ -270,7 +275,14 @@ internal static class HumlSerializer
                 else if (item is IEnumerable nested and not string)
                     SerializeSequenceInline(sb, nested, depth + 1, options);
                 else if (item != null)
+                {
+                    var itemType = item.GetType();
+                    if (IsUnsupportedType(itemType))
+                        throw new HumlSerializeException(
+                            $"Cannot serialize type '{itemType.FullName}': delegates, function pointers, and " +
+                            "similar non-data types are not supported by HumlSerializer.");
                     SerializeMappingBody(sb, item, depth + 1, options);
+                }
             }
         }
     }
@@ -302,7 +314,14 @@ internal static class HumlSerializer
                 else if (item is IEnumerable nested and not string)
                     SerializeSequenceInline(sb, nested, depth + 1, options);
                 else if (item != null)
+                {
+                    var itemType = item.GetType();
+                    if (IsUnsupportedType(itemType))
+                        throw new HumlSerializeException(
+                            $"Cannot serialize type '{itemType.FullName}': delegates, function pointers, and " +
+                            "similar non-data types are not supported by HumlSerializer.");
                     SerializeMappingBody(sb, item, depth + 1, options);
+                }
             }
         }
     }
