@@ -1,3 +1,4 @@
+using System.Text;
 using AwesomeAssertions;
 using Huml.Net.Exceptions;
 using Huml.Net.Parser;
@@ -346,5 +347,70 @@ public class HumlParserTests
         var scalar = (HumlScalar)doc.Entries[0];
         scalar.Kind.Should().Be(ScalarKind.Integer);
         scalar.Value.Should().Be(255L);
+    }
+
+    // ── 9. Depth limit tests (PARS-05) ────────────────────────────────────────
+
+    [Fact]
+    public void Parse_DeeplyNestedDict_ExceedingDefaultLimit_ThrowsHumlParseException()
+    {
+        // Build 513 levels of nested dicts (one more than the default limit of 512)
+        var sb = new StringBuilder();
+        for (int i = 0; i <= 512; i++)
+            sb.Append(new string(' ', i * 2)).Append($"k{i}::\n");
+        sb.Append(new string(' ', 513 * 2)).Append("leaf: \"done\"");
+        var input = sb.ToString();
+
+        Action act = () => new HumlParser(input, HumlOptions.Default).Parse();
+        act.Should().Throw<HumlParseException>().WithMessage("*Recursion depth limit*");
+    }
+
+    [Fact]
+    public void Parse_DeeplyNestedList_ExceedingDefaultLimit_ThrowsHumlParseException()
+    {
+        // Build 513 levels of nested lists (one more than the default limit of 512)
+        var sb = new StringBuilder();
+        for (int i = 0; i <= 512; i++)
+            sb.Append(new string(' ', i * 2)).Append("- ::\n");
+        sb.Append(new string(' ', 513 * 2)).Append("- \"done\"");
+        var input = sb.ToString();
+
+        Action act = () => new HumlParser(input, HumlOptions.Default).Parse();
+        act.Should().Throw<HumlParseException>().WithMessage("*Recursion depth limit*");
+    }
+
+    [Fact]
+    public void Parse_CustomDepthLimit_ThrowsAtConfiguredDepth()
+    {
+        // 4 levels of nesting with MaxRecursionDepth = 3 should throw
+        const string input = "a::\n  b::\n    c::\n      d: 1";
+        var options = new HumlOptions { MaxRecursionDepth = 3 };
+
+        Action act = () => new HumlParser(input, options).Parse();
+        act.Should().Throw<HumlParseException>().WithMessage("*Recursion depth limit of 3*");
+    }
+
+    [Fact]
+    public void Parse_WithinDepthLimit_Succeeds()
+    {
+        // 5 levels of nesting — each level consumes 2 depth units (ParseVector + ParseMultilineDict)
+        // so total depth is at most 10; use MaxRecursionDepth = 50 to be well within limit
+        var sb = new StringBuilder();
+        for (int i = 0; i < 5; i++)
+            sb.Append(new string(' ', i * 2)).Append($"k{i}::\n");
+        sb.Append(new string(' ', 5 * 2)).Append("leaf: \"done\"");
+        var input = sb.ToString();
+
+        var options = new HumlOptions { MaxRecursionDepth = 50 };
+        var doc = new HumlParser(input, options).Parse();
+        doc.Should().NotBeNull();
+        doc.Entries.Should().HaveCount(1);
+    }
+
+    [Fact]
+    public void Parse_DefaultMaxRecursionDepth_Is512()
+    {
+        HumlOptions.Default.MaxRecursionDepth.Should().Be(512);
+        new HumlOptions().MaxRecursionDepth.Should().Be(512);
     }
 }
