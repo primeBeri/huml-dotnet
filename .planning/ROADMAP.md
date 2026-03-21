@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Lexer and Token Types** - Single-pass `ReadOnlySpan<char>` lexer producing typed tokens with version-gated rules (completed 2026-03-21)
 - [x] **Phase 4: AST Node Hierarchy** - Immutable `abstract record` AST tree consumed by parser and future linting package (completed 2026-03-21)
 - [x] **Phase 5: Parser** - Recursive-descent parser covering full HUML v0.1 and v0.2 grammar with depth-limit guard (completed 2026-03-21)
-- [ ] **Phase 6: Attributes and Serializer/Deserializer** - Reflection-based serialization and deserialization with attribute-driven mapping
+- [x] **Phase 6: Attributes and Serializer/Deserializer** - Reflection-based serialization and deserialization with attribute-driven mapping (completed 2026-03-21)
 - [ ] **Phase 7: Static Entry Point and Shared Fixture Compliance** - `Huml` static class wiring all pipeline stages; CI passes all fixture suite tests
 - [ ] **Phase 8: NuGet Release Preparation** - Verified multi-TFM package with SourceLink, XML docs, and first NuGet publish
 
@@ -101,10 +101,10 @@ Plans:
   3. Deserializing a HUML document into a POCO that has `init`-only properties throws `HumlDeserializeException` with a clear message identifying the offending property rather than silently skipping it or throwing a runtime `MethodAccessException`
   4. All supported collection types (`List<T>`, `T[]`, `IEnumerable<T>`, `Dictionary<string,T>`) and primitive scalars survive a serialize -> deserialize round-trip with value equality
   5. A type-coercion failure (e.g., mapping a HUML string to an `int` property) throws `HumlDeserializeException` with the offending key and line number in the message
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [x] 06-01-PLAN.md — Contracts: attributes, exceptions, PropertyDescriptor cache, and Inf sign fix (SER-01, SER-02, SER-03, SER-07)
-- [ ] 06-02-PLAN.md — TDD HumlSerializer: object to HUML text with declaration-order emission (SER-03, SER-04)
+- [x] 06-02-PLAN.md — TDD HumlSerializer: object to HUML text with declaration-order emission (SER-03, SER-04)
 - [x] 06-03-PLAN.md — TDD HumlDeserializer: HUML AST to .NET object with collection dispatch (SER-05, SER-06)
 
 ### Phase 7: Static Entry Point and Shared Fixture Compliance
@@ -145,6 +145,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Lexer and Token Types | 2/2 | Complete   | 2026-03-21 |
 | 4. AST Node Hierarchy | 1/1 | Complete   | 2026-03-21 |
 | 5. Parser | 2/2 | Complete   | 2026-03-21 |
-| 6. Attributes and Serializer/Deserializer | 2/3 | In Progress|  |
+| 6. Attributes and Serializer/Deserializer | 3/3 | Complete   | 2026-03-21 |
 | 7. Static Entry Point and Shared Fixture Compliance | 0/? | Not started | - |
 | 8. NuGet Release Preparation | 0/? | Not started | - |

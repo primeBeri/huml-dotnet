@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v0.1
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 06-03-PLAN.md
-last_updated: "2026-03-21T09:30:53.304Z"
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-03-21T10:05:11.624Z"
 progress:
   total_phases: 8
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 11
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Project State
@@ -56,6 +56,7 @@ Plan: 3 of 3
 | Phase 05 P02 | 2 | 2 tasks | 3 files |
 | Phase 06 P01 | 3 | 2 tasks | 10 files |
 | Phase 06 P03 | 4 | 2 tasks | 2 files |
+| Phase 06 P02 | 39min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,8 @@ Recent decisions affecting current work:
 - [Phase 06]: Test for -inf uses mapping value (key: -inf) not root scalar — '-' at col 0 is ListItem token, not sign prefix
 - [Phase 06]: IEnumerable<T> dispatch checks typeDef == typeof(IEnumerable<>) before GetInterface() — GetInterface() returns null when targetType IS the interface
 - [Phase 06]: HumlDeserializer.Deserialize(string, Type) untyped overload is internal — Phase 7 public API delegates to it
+- [Phase 06]: HumlSerializer is internal static class; SerializeValue dispatches by exact CLR type for correct priority (string before IEnumerable)
+- [Phase 06]: EmitEntry materializes IEnumerable into List<object?> once to check empty without double-enumerating
 
 ### Pending Todos
 
@@ -104,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T09:30:53.302Z
-Stopped at: Completed 06-03-PLAN.md
+Last session: 2026-03-21T10:05:11.621Z
+Stopped at: Completed 06-02-PLAN.md
 Resume file: None
