@@ -101,9 +101,11 @@ Plans:
   3. Deserializing a HUML document into a POCO that has `init`-only properties throws `HumlDeserializeException` with a clear message identifying the offending property rather than silently skipping it or throwing a runtime `MethodAccessException`
   4. All supported collection types (`List<T>`, `T[]`, `IEnumerable<T>`, `Dictionary<string,T>`) and primitive scalars survive a serialize -> deserialize round-trip with value equality
   5. A type-coercion failure (e.g., mapping a HUML string to an `int` property) throws `HumlDeserializeException` with the offending key and line number in the message
-**Plans:** 0/1 plans complete
+**Plans:** 3 plans
 Plans:
-- [ ] 02-01-PLAN.md — Versioning types, exceptions, and unit tests (VER-01, VER-02, VER-03, VER-04, VER-05)
+- [ ] 06-01-PLAN.md — Contracts: attributes, exceptions, PropertyDescriptor cache, and Inf sign fix (SER-01, SER-02, SER-03, SER-07)
+- [ ] 06-02-PLAN.md — TDD HumlSerializer: object to HUML text with declaration-order emission (SER-03, SER-04)
+- [ ] 06-03-PLAN.md — TDD HumlDeserializer: HUML AST to .NET object with collection dispatch (SER-05, SER-06)
 
 ### Phase 7: Static Entry Point and Shared Fixture Compliance
 **Goal**: The `Huml` static class wires the complete pipeline; CI passes all `huml-lang/tests` fixtures for both v0.1 and v0.2 with a verified non-zero Theory count, certifying full spec compliance
@@ -114,9 +116,9 @@ Plans:
   2. `Huml.Deserialize<T>(ReadOnlySpan<char> huml, ...)` is the single implementation overload; `Huml.Deserialize<T>(string huml, ...)` is a thin `AsSpan()` wrapper -- confirmed by inspecting that only one overload reaches the Lexer
   3. All xUnit Theory rows from both `huml-lang/tests@v0.1` and `huml-lang/tests@v0.2` fixture suites pass in CI with a non-zero Theory count logged for each version
   4. All public members of `Huml`, `HumlOptions`, `HumlSpecVersion`, `HumlParseException`, `HumlSerializeException`, `HumlDeserializeException`, `HumlUnsupportedVersionException`, `[HumlProperty]`, and `[HumlIgnore]` carry XML doc comments visible in IntelliSense
-**Plans:** 0/1 plans complete
+**Plans:** 0/? plans complete
 Plans:
-- [ ] 02-01-PLAN.md — Versioning types, exceptions, and unit tests (VER-01, VER-02, VER-03, VER-04, VER-05)
+- [ ] To be planned
 
 ### Phase 8: NuGet Release Preparation
 **Goal**: The NuGet package is verified complete -- correct TFM coverage, working SourceLink, embedded XML docs, and a successful pre-release publish to NuGet.org via OIDC Trusted Publishing
@@ -127,9 +129,9 @@ Plans:
   2. `dotnet sourcelink test Huml.Net.*.nupkg` passes, confirming embedded PDB has real commit SHAs and source-stepping works from NuGet
   3. The package manifest contains `PackageId`, `Authors`, `Description`, `PackageLicenseExpression` (MIT), `PackageTags`, `PackageProjectUrl`, `RepositoryUrl`, `PackageReadmeFile`, and `GenerateDocumentationFile` -- confirmed by inspecting the `.nuspec` inside the `.nupkg`
   4. A `0.1.0-alpha.1` pre-release tag triggers the NuGet publish workflow; the package appears on NuGet.org without manual API key entry
-**Plans:** 0/1 plans complete
+**Plans:** 0/? plans complete
 Plans:
-- [ ] 02-01-PLAN.md — Versioning types, exceptions, and unit tests (VER-01, VER-02, VER-03, VER-04, VER-05)
+- [ ] To be planned
 
 ## Progress
 
@@ -143,6 +145,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Lexer and Token Types | 2/2 | Complete   | 2026-03-21 |
 | 4. AST Node Hierarchy | 1/1 | Complete   | 2026-03-21 |
 | 5. Parser | 2/2 | Complete   | 2026-03-21 |
-| 6. Attributes and Serializer/Deserializer | 0/? | Not started | - |
+| 6. Attributes and Serializer/Deserializer | 0/3 | Planned | - |
 | 7. Static Entry Point and Shared Fixture Compliance | 0/? | Not started | - |
 | 8. NuGet Release Preparation | 0/? | Not started | - |
