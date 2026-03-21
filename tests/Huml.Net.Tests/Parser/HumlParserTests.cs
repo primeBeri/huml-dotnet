@@ -285,7 +285,9 @@ public class HumlParserTests
         // Backtick multiline strings are valid in v0.1 but rejected by the lexer in v0.2.
         // The parser must propagate HumlOptions to the Lexer for this gate to fire.
         // A backtick multiline string — valid in v0.1, rejected in v0.2.
-        const string v01Input = "key::\n```\nline one\n```";
+        // Uses scalar indicator (not vector) so the backtick value follows on the next line
+        // as a HUML v0.1 triple-backtick multiline string.
+        const string v01Input = "key: ```\nline one\n```";
 
 #pragma warning disable CS0618
         var v01Options = new HumlOptions { SpecVersion = HumlSpecVersion.V0_1 };

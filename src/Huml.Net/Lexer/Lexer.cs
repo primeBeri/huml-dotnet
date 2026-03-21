@@ -101,15 +101,8 @@ internal sealed class Lexer
             if (IsLetter(ch))
                 return ScanBareKeyOrKeyword();
 
-            // At key position (start of line content), digits are not valid key starts
-            if (IsDigit(ch) && _col == _lineIndent)
-            {
-                throw new HumlParseException(
-                    "Keys must start with a letter [a-zA-Z].", _line, _col);
-            }
-
             if (IsDigit(ch))
-                return ScanNumber(false);
+                return ScanNumber(_col > _lineIndent);
 
             if (ch == '+')
                 return ScanSignedNumeric('+');

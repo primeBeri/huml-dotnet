@@ -395,9 +395,13 @@ public class LexerTests
     }
 
     [Fact]
-    public void Invalid_key_start_throws()
+    public void Integer_at_line_start_produces_Int_token()
     {
-        var act = () => LexAll("123: \"v\"");
-        act.Should().Throw<HumlParseException>();
+        // The lexer does not distinguish "root scalar" from "invalid key" — it always
+        // produces an Int token for digit sequences. The parser rejects integer keys.
+        var tokens = LexAll("123: \"v\"");
+        tokens.Should().HaveCount(4); // Int, ScalarIndicator, String, Eof
+        tokens[0].Type.Should().Be(TokenType.Int);
+        tokens[0].Value.Should().Be("123");
     }
 }
