@@ -143,6 +143,14 @@ internal sealed class Lexer
             if (ch == '`')
                 return ScanBacktickMultiline();
 
+            // Error path only — char.IsLetter is NOT used in acceptance logic
+            if (char.IsLetter(ch))
+            {
+                ThrowParseError(
+                    $"Bare keys must start with [a-zA-Z]. "
+                    + $"Non-Latin characters are supported in quoted keys: \"{ch}\": \"value\"");
+            }
+
             ThrowParseError($"Unexpected character '{ch}'.");
         }
 
@@ -997,6 +1005,10 @@ internal sealed class Lexer
     // Character classification
     // -----------------------------------------------------------------------
 
+    /// <summary>
+    /// ASCII-only letter check per the HUML spec — bare keys use <c>[a-zA-Z][a-zA-Z0-9_-]*</c>.
+    /// Non-Latin characters are supported via quoted keys.
+    /// </summary>
     private static bool IsLetter(char c) => (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
     private static bool IsDigit(char c) => c >= '0' && c <= '9';
     private static bool IsKeyChar(char c) => IsLetter(c) || IsDigit(c) || c == '_' || c == '-';

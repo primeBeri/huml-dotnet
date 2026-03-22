@@ -145,13 +145,14 @@ Plans:
 
 ### Phase 07.3: Unicode and RTL support with fixture extensions (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
-**Depends on:** Phase 7
-**Plans:** 0 plans
+**Goal:** Actionable error message for non-ASCII bare keys, fixture extension infrastructure (`fixtures/extensions/`) for local test cases not yet in upstream suite, comprehensive Unicode/RTL test coverage, and a repeatable fixture-gap audit rule
+**Requirements**: UNI-01, UNI-02, UNI-03, UNI-04, UNI-05, UNI-06
+**Depends on:** Phase 07.2
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 07.3 to break down)
+- [ ] 07.3-01-PLAN.md — Lexer error branch + IsLetter XML doc + LexerUnicodeTests (13 tests) + ParserUnicodeTests (8 tests) (UNI-01, UNI-02, UNI-03, UNI-04)
+- [ ] 07.3-02-PLAN.md — Fixture extension infrastructure (gaps.json, unicode.json, SharedSuiteTests extension, .csproj, fixture-gaps.md rule) (UNI-05, UNI-06)
 
 ### Phase 8: NuGet Release Preparation
 **Goal**: The NuGet package is verified complete -- correct TFM coverage, working SourceLink, embedded XML docs, and a successful pre-release publish to NuGet.org via OIDC Trusted Publishing
@@ -196,6 +197,15 @@ Plans:
 ### Phase 999.2: Inline serialisation support via HumlOptions and [HumlProperty] — spec compliance research first (BACKLOG)
 
 **Goal:** Add a `CollectionFormat` option to `HumlOptions` (global default: `Multiline`) and an `Inline` tri-state (`bool?`) to `[HumlProperty]` for per-property overrides, mirroring `System.Text.Json` conventions. Scalar-only collections use inline format when requested; complex-valued collections fall back to multiline silently. Includes a `docs/` markdown document covering usage, edge cases, and fallback behaviour. **Pre-condition:** research whether inline formats are intended for hand-written HUML only, or are first-class serialiser output per the spec authors' intentions — could affect whether this is implemented, deferred, or spec-tracked.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.3: Fix HumlSerializer key-quoting for non-ASCII dictionary keys (BACKLOG)
+
+**Goal:** `HumlSerializer.EmitEntry` always emits keys bare (e.g., `name: "value"`). When a `Dictionary<string, T>` has non-ASCII keys, the output is invalid HUML — the bare-key rule restricts keys to `[a-zA-Z][a-zA-Z0-9_-]*`. The fix is to detect non-ASCII key characters in `EmitEntry` and emit them as quoted keys (`"key": "value"` syntax) when necessary. Include a test that round-trips a `Dictionary<string, string>` with Arabic/Chinese keys and asserts the serialised output is valid HUML that re-parses correctly.
 **Requirements:** TBD
 **Plans:** 0 plans
 
