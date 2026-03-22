@@ -38,6 +38,12 @@ Full HUML spec compliance (v0.1 + v0.2), validated against the shared `huml-lang
 - [x] Actionable error message for non-ASCII letter at bare-key position ("Bare keys must start with [a-zA-Z]") — Validated in Phase 07.3: Unicode and RTL Support with Fixture Extensions
 - [x] `fixtures/extensions/` infrastructure with 11 gap assertions and 17 Unicode/RTL assertions, integrated into SharedSuiteTests via extension scan — Validated in Phase 07.3: Unicode and RTL Support with Fixture Extensions
 - [x] `HumlSerializer` emits quoted keys for non-bare-key strings (non-ASCII, digit-start, spaces, empty, colon-containing); bare keys remain unquoted (no regression); `Dictionary<string,T>` with non-ASCII keys round-trips with value equality — Validated in Phase 07.4: Fix HumlSerializer Key Quoting (D-08 closed)
+- [x] `CollectionFormat` enum (`Multiline=0`, `Inline=1`) on `HumlOptions` controls global inline serialisation opt-in — Validated in Phase 07.5: Inline Serialisation Support
+- [x] `[HumlProperty(Inline = InlineMode.Inline/Multiline)]` per-property override; `InlineMode.Inherit` (default) defers to `HumlOptions.CollectionFormat` — Validated in Phase 07.5: Inline Serialisation Support
+- [x] Scalar-only sequences emit `key:: v1, v2, v3`; scalar-valued dicts emit `key:: k: v, k2: v2`; complex collections silently fall back to multiline — Validated in Phase 07.5: Inline Serialisation Support
+- [x] Empty collections always emit `key:: []` / `key:: {}` regardless of `CollectionFormat` — Validated in Phase 07.5: Inline Serialisation Support
+- [x] Inline output round-trips through `Huml.Parse` without `HumlParseException` — Validated in Phase 07.5: Inline Serialisation Support
+- [x] Comprehensive round-trip tests against mixed fixture documents (v0.1 + v0.2): parse verification, typed sub-section value-equality (integers, floats, strings, booleans, nulls, 3-level nesting, edge-case keys), inline serialisation value-equality (lists, dicts, attribute overrides) — Validated in Phase 07.6: Comprehensive Round-Trip Tests Against Mixed Fixture Files
 
 ### Active
 
@@ -81,4 +87,4 @@ Full HUML spec compliance (v0.1 + v0.2), validated against the shared `huml-lang
 | `SpecVersionPolicy` constants as code | `HumlUnsupportedVersionException` references them directly — error message stays accurate without manual updates | — Pending |
 
 ---
-*Last updated: 2026-03-22 — Phase 07.4 complete: D-08 closed — `HumlSerializer` now emits quoted keys for all non-bare-key strings; `NeedsQuoting` + `AppendKey` helpers replace all 6 EmitEntry key-emission sites; 7 new SER-KEY tests; SER-KEY-01..07 backfilled into REQUIREMENTS.md (38 total v1 requirements). 662 tests green across net8.0/net9.0/net10.0.*
+*Last updated: 2026-03-22 — Phase 07.6 complete: Comprehensive round-trip tests added — `MixedFixtureRoundTripTests` (18 tests) covers parse verification, typed sub-section value-equality, and inline value-equality for both v0.1 and v0.2 mixed fixtures. 704 tests green across net8.0/net9.0/net10.0.*
