@@ -79,4 +79,20 @@ public class HumlSerializerKeyQuotingTests
         var huml = Huml.Serialize(dict);
         huml.Should().Contain("\"données\"::");
     }
+
+    // SER-KEY-08: colon is structurally significant in HUML (scalar/vector indicator) —
+    // an unquoted key containing ':' would produce ambiguous output (e.g. `a:b: v`)
+    [Fact]
+    public void RoundTrip_DictionaryWithColonInKey_QuotesKeyAndReparses()
+    {
+        var dict = new Dictionary<string, string> { ["a:b"] = "v" };
+        var huml = Huml.Serialize(dict);
+        huml.Should().Contain("\"a:b\": ");
+
+        var act = () => Huml.Parse(huml, HumlOptions.AutoDetect);
+        act.Should().NotThrow();
+
+        var result = Huml.Deserialize<Dictionary<string, string>>(huml, HumlOptions.AutoDetect);
+        result["a:b"].Should().Be("v");
+    }
 }
