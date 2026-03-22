@@ -161,13 +161,15 @@ internal static class HumlSerializer
             if (desc.OmitIfDefault && Equals(propValue, desc.DefaultValue))
                 continue;
 
-            EmitEntry(sb, indent, desc.HumlKey, propValue, depth, options);
+            EmitEntry(sb, indent, desc.HumlKey, propValue, depth, options, desc.Inline);
         }
     }
 
     /// <summary>
     /// Emits a single key-value entry.
     /// Scalars use <c>key: value\n</c>; complex values use <c>key::\n</c> then body.
+    /// When <paramref name="inlineOverride"/> is non-null it takes precedence over
+    /// <see cref="HumlOptions.CollectionFormat"/> for collection properties.
     /// </summary>
     private static void EmitEntry(
         StringBuilder sb,
@@ -175,7 +177,8 @@ internal static class HumlSerializer
         string key,
         object? value,
         int depth,
-        HumlOptions options)
+        HumlOptions options,
+        bool? inlineOverride = null)
     {
         if (IsScalarValue(value))
         {
@@ -186,6 +189,9 @@ internal static class HumlSerializer
             sb.Append('\n');
             return;
         }
+
+        // Compute effective inline intent (scalar properties are unaffected — handled above)
+        bool wantInline = inlineOverride ?? (options.CollectionFormat == CollectionFormat.Inline);
 
         // null is also scalar — handled above (IsScalarValue returns true for null)
 
@@ -199,6 +205,11 @@ internal static class HumlSerializer
                 sb.Append(":: {}\n");
                 return;
             }
+            if (wantInline && AllDictionaryValuesAreScalar(dict))
+            {
+                EmitInlineDictionary(sb, indent, key, dict, options);
+                return;
+            }
             sb.Append(indent);
             AppendKey(sb, key);
             sb.Append("::\n");
@@ -208,7 +219,7 @@ internal static class HumlSerializer
 
         if (value is IEnumerable enumerable and not string)
         {
-            // Check if empty
+            // Materialise once to check empty / all-scalar without double-enumerating
             var items = new List<object?>();
             foreach (var item in enumerable)
                 items.Add(item);
@@ -218,6 +229,11 @@ internal static class HumlSerializer
                 sb.Append(indent);
                 AppendKey(sb, key);
                 sb.Append(":: []\n");
+                return;
+            }
+            if (wantInline && items.TrueForAll(IsScalarValue))
+            {
+                EmitInlineSequence(sb, indent, key, items, depth, options);
                 return;
             }
             sb.Append(indent);
@@ -237,6 +253,58 @@ internal static class HumlSerializer
         AppendKey(sb, key);
         sb.Append("::\n");
         SerializeMappingBody(sb, value!, depth + 1, options);
+    }
+
+    /// <summary>
+    /// Emits a scalar-only sequence in inline format: <c>key:: v1, v2, v3\n</c>.
+    /// Caller must verify all items are scalar before calling.
+    /// </summary>
+    private static void EmitInlineSequence(
+        StringBuilder sb, string indent, string key, List<object?> items, int depth, HumlOptions options)
+    {
+        sb.Append(indent);
+        AppendKey(sb, key);
+        sb.Append(":: ");
+        for (int i = 0; i < items.Count; i++)
+        {
+            if (i > 0) sb.Append(", ");
+            SerializeValue(sb, items[i], depth + 1, options);
+        }
+        sb.Append('\n');
+    }
+
+    /// <summary>
+    /// Emits a scalar-valued dictionary in inline format: <c>key:: k1: v1, k2: v2\n</c>.
+    /// Caller must verify all values are scalar before calling.
+    /// </summary>
+    private static void EmitInlineDictionary(
+        StringBuilder sb, string indent, string key, IDictionary dict, HumlOptions options)
+    {
+        sb.Append(indent);
+        AppendKey(sb, key);
+        sb.Append(":: ");
+        bool first = true;
+        foreach (DictionaryEntry entry in dict)
+        {
+            if (!first) sb.Append(", ");
+            first = false;
+            var entryKey = entry.Key?.ToString() ?? "null";
+            AppendKey(sb, entryKey);
+            sb.Append(": ");
+            SerializeValue(sb, entry.Value, 0, options);
+        }
+        sb.Append('\n');
+    }
+
+    /// <summary>
+    /// Returns <c>true</c> when every value in <paramref name="dict"/> is a scalar
+    /// (eligible for inline dictionary format).
+    /// </summary>
+    private static bool AllDictionaryValuesAreScalar(IDictionary dict)
+    {
+        foreach (DictionaryEntry e in dict)
+            if (!IsScalarValue(e.Value)) return false;
+        return true;
     }
 
     // ── Sequence (list / array) ───────────────────────────────────────────────
@@ -283,6 +351,8 @@ internal static class HumlSerializer
     /// <summary>
     /// Emits dictionary entries at <paramref name="depth"/>. Assumes caller already emitted
     /// the <c>key::\n</c> header line.
+    /// Dictionary entries do not inherit per-property inline overrides; they always use
+    /// multiline unless a per-entry override is explicitly supplied.
     /// </summary>
     private static void SerializeDictionaryBody(
         StringBuilder sb,
@@ -295,7 +365,8 @@ internal static class HumlSerializer
         {
             var key = entry.Key?.ToString() ?? "null";
             var value = entry.Value;
-            EmitEntry(sb, indent, key, value, depth, options);
+            // Dictionary entries are always emitted multiline — inline is a POCO-property-level concern
+            EmitEntry(sb, indent, key, value, depth, options, inlineOverride: false);
         }
     }
 
