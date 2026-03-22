@@ -37,6 +37,7 @@ Full HUML spec compliance (v0.1 + v0.2), validated against the shared `huml-lang
 - [x] `MaxRecursionDepth` validates range `[1, 65536]` at construction time — Validated in Phase 07.2: Code Quality, API Accuracy and Performance Optimisations
 - [x] Actionable error message for non-ASCII letter at bare-key position ("Bare keys must start with [a-zA-Z]") — Validated in Phase 07.3: Unicode and RTL Support with Fixture Extensions
 - [x] `fixtures/extensions/` infrastructure with 11 gap assertions and 17 Unicode/RTL assertions, integrated into SharedSuiteTests via extension scan — Validated in Phase 07.3: Unicode and RTL Support with Fixture Extensions
+- [x] `HumlSerializer` emits quoted keys for non-bare-key strings (non-ASCII, digit-start, spaces, empty, colon-containing); bare keys remain unquoted (no regression); `Dictionary<string,T>` with non-ASCII keys round-trips with value equality — Validated in Phase 07.4: Fix HumlSerializer Key Quoting (D-08 closed)
 
 ### Active
 
@@ -80,4 +81,4 @@ Full HUML spec compliance (v0.1 + v0.2), validated against the shared `huml-lang
 | `SpecVersionPolicy` constants as code | `HumlUnsupportedVersionException` references them directly — error message stays accurate without manual updates | — Pending |
 
 ---
-*Last updated: 2026-03-22 — Phase 07.3 complete: Unicode and RTL support — actionable error for non-ASCII bare keys; `fixtures/extensions/` infrastructure with 11 gap assertions + 17 Unicode/RTL assertions; SharedSuiteTests extension scan with Directory.Exists guard; `.claude/rules/fixture-gaps.md` repeatable audit rule. 655 tests green across net8.0/net9.0/net10.0.*
+*Last updated: 2026-03-22 — Phase 07.4 complete: D-08 closed — `HumlSerializer` now emits quoted keys for all non-bare-key strings; `NeedsQuoting` + `AppendKey` helpers replace all 6 EmitEntry key-emission sites; 7 new SER-KEY tests; SER-KEY-01..07 backfilled into REQUIREMENTS.md (38 total v1 requirements). 662 tests green across net8.0/net9.0/net10.0.*
