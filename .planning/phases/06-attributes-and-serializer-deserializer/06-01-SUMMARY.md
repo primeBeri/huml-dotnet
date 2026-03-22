@@ -148,6 +148,10 @@ None - no external service configuration required.
 - HumlDeserializeException with Key/Line is ready for HumlDeserializer (06-03) error reporting
 - Inf/NaN raw sign strings are available for the deserializer to map to double.PositiveInfinity / double.NegativeInfinity
 
+## Self-Check: PASSED
+
+All 8 created files exist on disk. All 3 task commits (b41eeea, 4e07099, ca96c3e) found in git log. Full test suite 163/163 passing across net8.0/net9.0/net10.0.
+
 ---
 *Phase: 06-attributes-and-serializer-deserializer*
 *Completed: 2026-03-21*

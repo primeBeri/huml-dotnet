@@ -57,7 +57,7 @@ Requirements for initial release. Each maps to a roadmap phase.
 - [x] **API-03**: All public members carry XML doc comments (`<summary>`, `<param>`, `<returns>`, `<exception>`) shipped in the NuGet package for IntelliSense
 - [ ] **API-04**: NuGet package metadata is complete: `PackageId`, `Authors`, `Description`, `PackageLicenseExpression` (MIT), `PackageTags`, `PackageProjectUrl`, `RepositoryUrl`, `PackageReadmeFile` (embedded README), `GenerateDocumentationFile`
 - [ ] **API-05**: NuGet package uses MinVer for git-tag-driven `PackageVersion` derivation and ships with embedded PDB (SourceLink with `PublishRepositoryUrl=true`, `EmbedUntrackedSources=true`, `ContinuousIntegrationBuild` gated on `$(GITHUB_ACTIONS)=='true'`)
-- [ ] **API-06**: `SharedSuiteTests.cs` Theory runner consumes `huml-lang/tests` v0.1 and v0.2 fixture suites; both fixture suites pass in CI with a verified non-zero Theory count for each version
+- [x] **API-06**: `SharedSuiteTests.cs` Theory runner consumes `huml-lang/tests` v0.1 and v0.2 fixture suites; both fixture suites pass in CI with a verified non-zero Theory count for each version
 
 ## v2 Requirements
 
@@ -142,7 +142,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-03 | Phase 7 | Complete |
 | API-04 | Phase 8 | Pending |
 | API-05 | Phase 8 | Pending |
-| API-06 | Phase 7 | Pending |
+| API-06 | Phase 7 | Complete |
 
 **Coverage:**
 - v1 requirements: 31 total

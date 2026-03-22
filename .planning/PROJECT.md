@@ -74,4 +74,4 @@ Full HUML spec compliance (v0.1 + v0.2), validated against the shared `huml-lang
 | `SpecVersionPolicy` constants as code | `HumlUnsupportedVersionException` references them directly — error message stays accurate without manual updates | — Pending |
 
 ---
-*Last updated: 2026-03-21 — Phase 07 complete: `Huml` public static facade (6 overloads, XML docs), SharedSuiteTests Theory runner, 11 Lexer/Parser spec-compliance fixes. 577 tests green across net8.0/net9.0/net10.0. API-01, API-02, API-03, API-06 all satisfied.*
+*Last updated: 2026-03-22 — Phase 07.1 complete: version header wiring — `%HUML vX.Y` directive now reads, validates, and propagates to both Lexer and Parser; all 3 `UnknownVersionBehaviour` modes implemented; 8 new VER-HEADER tests. 585 tests green across net8.0/net9.0/net10.0.*
