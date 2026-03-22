@@ -396,6 +396,7 @@ internal static class HumlSerializer
         s = s.Replace("\\", "\\\\", StringComparison.Ordinal);
         s = s.Replace("\"", "\\\"", StringComparison.Ordinal);
         s = s.Replace("\n", "\\n", StringComparison.Ordinal);
+        s = s.Replace("\r", "\\r", StringComparison.Ordinal);
         s = s.Replace("\t", "\\t", StringComparison.Ordinal);
         return s;
     }

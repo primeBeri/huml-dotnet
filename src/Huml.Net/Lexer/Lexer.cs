@@ -17,7 +17,8 @@ internal sealed class Lexer
     /// <summary>Initialises the lexer with a string source and parsing options.</summary>
     internal Lexer(string source, HumlOptions options)
     {
-        _source = source;
+        _source = source.Replace("\r\n", "\n", StringComparison.Ordinal)
+                        .Replace("\r", "\n", StringComparison.Ordinal);
         _options = options;
     }
 
