@@ -62,7 +62,7 @@ internal static class HumlSerializer
         if (value is string str)
         {
             sb.Append('"');
-            sb.Append(EscapeString(str));
+            AppendEscapedString(sb, str);
             sb.Append('"');
             return;
         }
@@ -157,13 +157,9 @@ internal static class HumlSerializer
         {
             var propValue = desc.Property.GetValue(obj);
 
-            // OmitIfDefault: skip if value equals the type's default
-            if (desc.OmitIfDefault)
-            {
-                var defaultVal = GetDefaultValue(desc.Property.PropertyType);
-                if (Equals(propValue, defaultVal))
-                    continue;
-            }
+            // OmitIfDefault: skip if value equals the type's default (cached in descriptor)
+            if (desc.OmitIfDefault && Equals(propValue, desc.DefaultValue))
+                continue;
 
             EmitEntry(sb, indent, desc.HumlKey, propValue, depth, options);
         }
@@ -390,15 +386,20 @@ internal static class HumlSerializer
         return d.ToString("G", CultureInfo.InvariantCulture);
     }
 
-    private static string EscapeString(string s)
+    private static void AppendEscapedString(StringBuilder sb, string s)
     {
-        // Order matters: escape backslash first to avoid double-escaping
-        s = s.Replace("\\", "\\\\", StringComparison.Ordinal);
-        s = s.Replace("\"", "\\\"", StringComparison.Ordinal);
-        s = s.Replace("\n", "\\n", StringComparison.Ordinal);
-        s = s.Replace("\r", "\\r", StringComparison.Ordinal);
-        s = s.Replace("\t", "\\t", StringComparison.Ordinal);
-        return s;
+        foreach (char c in s)
+        {
+            switch (c)
+            {
+                case '\\': sb.Append("\\\\"); break;
+                case '"':  sb.Append("\\\""); break;
+                case '\n': sb.Append("\\n");  break;
+                case '\r': sb.Append("\\r");  break;
+                case '\t': sb.Append("\\t");  break;
+                default:   sb.Append(c);      break;
+            }
+        }
     }
 
     private static string VersionString(HumlSpecVersion version) =>
@@ -407,7 +408,4 @@ internal static class HumlSerializer
 #pragma warning restore CS0618
 
     private static string Indent(int depth) => new(' ', depth * 2);
-
-    private static object? GetDefaultValue(Type t) =>
-        t.IsValueType ? Activator.CreateInstance(t) : null;
 }

@@ -16,7 +16,8 @@ internal sealed record PropertyDescriptor(
     string HumlKey,
     PropertyInfo Property,
     bool OmitIfDefault,
-    bool IsInitOnly)
+    bool IsInitOnly,
+    object? DefaultValue)
 {
     // ── Cache ─────────────────────────────────────────────────────────────────
 
@@ -74,7 +75,11 @@ internal sealed record PropertyDescriptor(
                 // Detect init-only setter via IsExternalInit custom modifier
                 bool isInitOnly = DetectInitOnly(prop);
 
-                result.Add(new PropertyDescriptor(humlKey, prop, omitIfDefault, isInitOnly));
+                object? defaultValue = omitIfDefault
+                    ? (prop.PropertyType.IsValueType ? Activator.CreateInstance(prop.PropertyType) : null)
+                    : null;
+
+                result.Add(new PropertyDescriptor(humlKey, prop, omitIfDefault, isInitOnly, defaultValue));
             }
         }
 
