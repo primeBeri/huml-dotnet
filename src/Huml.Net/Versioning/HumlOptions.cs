@@ -31,6 +31,15 @@ public sealed class HumlOptions
     public UnknownVersionBehaviour UnknownVersionBehaviour { get; init; }
         = UnknownVersionBehaviour.Throw;
 
+    /// <summary>
+    /// Controls the default output format for collections during serialisation.
+    /// <see cref="CollectionFormat.Multiline"/> (the default) emits indented block format.
+    /// <see cref="CollectionFormat.Inline"/> emits <c>key:: a, b, c</c> for scalar-only
+    /// sequences and <c>key:: k: v, k2: v2</c> for scalar-valued dictionaries.
+    /// Collections containing non-scalar items silently fall back to multiline.
+    /// </summary>
+    public CollectionFormat CollectionFormat { get; init; } = CollectionFormat.Multiline;
+
     private int _maxRecursionDepth = 512;
 
     /// <summary>

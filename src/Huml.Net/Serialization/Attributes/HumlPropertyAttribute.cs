@@ -24,6 +24,15 @@ public sealed class HumlPropertyAttribute : Attribute
     public bool OmitIfDefault { get; init; }
 
     /// <summary>
+    /// Per-property inline format override for collection properties.
+    /// <c>true</c> requests inline format (with silent multiline fallback for non-scalar items);
+    /// <c>false</c> forces multiline regardless of the global <c>CollectionFormat</c> setting;
+    /// <c>null</c> (default) inherits the global <c>HumlOptions.CollectionFormat</c> setting.
+    /// Has no effect on non-collection properties (scalars, POCOs).
+    /// </summary>
+    public bool? Inline { get; init; }
+
+    /// <summary>
     /// Initialises a new instance with an optional HUML key name override.
     /// </summary>
     /// <param name="name">The HUML key name, or <c>null</c> to use the property name.</param>
