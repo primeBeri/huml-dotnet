@@ -118,14 +118,14 @@ internal static class HumlSerializer
         // IDictionary<string, *> — must precede IEnumerable
         if (value is IDictionary dict)
         {
-            SerializeDictionaryInline(sb, dict, depth, options);
+            SerializeDictionaryBody(sb, dict, depth, options);
             return;
         }
 
         // IEnumerable (arrays, lists, etc.)
         if (value is IEnumerable enumerable)
         {
-            SerializeSequenceInline(sb, enumerable, depth, options);
+            EmitSequenceItems(sb, enumerable, depth, options);
             return;
         }
 
@@ -223,7 +223,7 @@ internal static class HumlSerializer
             sb.Append(indent);
             sb.Append(key);
             sb.Append("::\n");
-            SerializeSequenceBody(sb, items, depth + 1, options);
+            EmitSequenceItems(sb, items, depth + 1, options);
             return;
         }
 
@@ -242,53 +242,11 @@ internal static class HumlSerializer
     // ── Sequence (list / array) ───────────────────────────────────────────────
 
     /// <summary>
-    /// Handles IEnumerable values encountered inline (as root-level body or direct call).
-    /// This is called only for sequences that appear AS values in other collections.
+    /// Emits items of an <see cref="IEnumerable"/> as sequence entries at <paramref name="depth"/>.
+    /// This is the single shared implementation for all sequence serialisation paths.
     /// </summary>
-    private static void SerializeSequenceInline(
-        StringBuilder sb,
-        IEnumerable enumerable,
-        int depth,
-        HumlOptions options)
-    {
-        var indent = Indent(depth);
-        foreach (var item in enumerable)
-        {
-            sb.Append(indent);
-            sb.Append("- ");
-            if (IsScalarValue(item))
-            {
-                SerializeValue(sb, item, depth + 1, options);
-                sb.Append('\n');
-            }
-            else
-            {
-                sb.Append('\n');
-                if (item is IDictionary dict2)
-                    SerializeDictionaryBody(sb, dict2, depth + 1, options);
-                else if (item is IEnumerable nested and not string)
-                    SerializeSequenceInline(sb, nested, depth + 1, options);
-                else if (item != null)
-                {
-                    var itemType = item.GetType();
-                    if (IsUnsupportedType(itemType))
-                        throw new HumlSerializeException(
-                            $"Cannot serialize type '{itemType.FullName}': delegates, function pointers, and " +
-                            "similar non-data types are not supported by HumlSerializer.");
-                    SerializeMappingBody(sb, item, depth + 1, options);
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// Emits items of a pre-materialized list as sequence entries at <paramref name="depth"/>.
-    /// </summary>
-    private static void SerializeSequenceBody(
-        StringBuilder sb,
-        List<object?> items,
-        int depth,
-        HumlOptions options)
+    private static void EmitSequenceItems(
+        StringBuilder sb, IEnumerable items, int depth, HumlOptions options)
     {
         var indent = Indent(depth);
         foreach (var item in items)
@@ -306,7 +264,7 @@ internal static class HumlSerializer
                 if (item is IDictionary dict2)
                     SerializeDictionaryBody(sb, dict2, depth + 1, options);
                 else if (item is IEnumerable nested and not string)
-                    SerializeSequenceInline(sb, nested, depth + 1, options);
+                    EmitSequenceItems(sb, nested, depth + 1, options);
                 else if (item != null)
                 {
                     var itemType = item.GetType();
@@ -321,18 +279,6 @@ internal static class HumlSerializer
     }
 
     // ── Dictionary ────────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Handles IDictionary values encountered inline.
-    /// </summary>
-    private static void SerializeDictionaryInline(
-        StringBuilder sb,
-        IDictionary dict,
-        int depth,
-        HumlOptions options)
-    {
-        SerializeDictionaryBody(sb, dict, depth, options);
-    }
 
     /// <summary>
     /// Emits dictionary entries at <paramref name="depth"/>. Assumes caller already emitted
