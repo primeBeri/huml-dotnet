@@ -72,7 +72,12 @@ internal sealed record PropertyDescriptor(
                 var humlProp = prop.GetCustomAttribute<HumlPropertyAttribute>();
                 string humlKey = (humlProp?.Name is { Length: > 0 } name) ? name : prop.Name;
                 bool omitIfDefault = humlProp?.OmitIfDefault ?? false;
-                bool? inline = humlProp?.Inline;
+                bool? inline = humlProp?.Inline switch
+                {
+                    InlineMode.Inline    => true,
+                    InlineMode.Multiline => false,
+                    _                   => null,
+                };
 
                 // Detect init-only setter via IsExternalInit custom modifier
                 bool isInitOnly = DetectInitOnly(prop);

@@ -25,12 +25,12 @@ public sealed class HumlPropertyAttribute : Attribute
 
     /// <summary>
     /// Per-property inline format override for collection properties.
-    /// <c>true</c> requests inline format (with silent multiline fallback for non-scalar items);
-    /// <c>false</c> forces multiline regardless of the global <c>CollectionFormat</c> setting;
-    /// <c>null</c> (default) inherits the global <c>HumlOptions.CollectionFormat</c> setting.
+    /// <see cref="InlineMode.Inline"/> requests inline format (with silent multiline fallback for non-scalar items);
+    /// <see cref="InlineMode.Multiline"/> forces multiline regardless of the global setting;
+    /// <see cref="InlineMode.Inherit"/> (default) inherits the global <c>HumlOptions.CollectionFormat</c> setting.
     /// Has no effect on non-collection properties (scalars, POCOs).
     /// </summary>
-    public bool? Inline { get; init; }
+    public InlineMode Inline { get; init; } = InlineMode.Inherit;
 
     /// <summary>
     /// Initialises a new instance with an optional HUML key name override.
