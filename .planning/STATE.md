@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
 milestone: v0.1
-milestone_name: milestone
+milestone_name: "coverage. Extend Phase 07.5 inline tests from NotThrow-only to full value-equality round-trips.**Requirements**: MIX-01, MIX-02, MIX-03, MIX-04, MIX-05**Depends on:** Phase 07.5**Plans:** 1 planPlans:- [ ] 07.6-01-PLAN.md — Parse verification, typed sub-section round-trips, and inline value-equality tests"
 status: unknown
-stopped_at: Completed 07.5-02-PLAN.md
-last_updated: "2026-03-22T21:51:08.489Z"
+stopped_at: Completed 07.6-01-PLAN.md
+last_updated: "2026-03-22T22:40:38.290Z"
 progress:
   total_phases: 18
-  completed_phases: 12
-  total_plans: 22
-  completed_plans: 22
+  completed_phases: 13
+  total_plans: 23
+  completed_plans: 23
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Full HUML spec compliance (v0.1 + v0.2), validated against the shared `huml-lang/tests` test suite, with zero external runtime dependencies and a `System.Text.Json`-style API that .NET developers already know.
-**Current focus:** Phase 07.5 — inline-serialisation-support-via-humloptions-and-humlproperty
+**Current focus:** Phase 07.6 — comprehensive-round-trip-tests-against-mixed-fixture-files
 
 ## Current Position
 
-Phase: 07.5 (inline-serialisation-support-via-humloptions-and-humlproperty) — EXECUTING
-Plan: 2 of 2
+Phase: 07.6 (comprehensive-round-trip-tests-against-mixed-fixture-files) — EXECUTING
+Plan: 1 of 1
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Plan: 2 of 2
 | Phase 07.4 P01 | 5min | 2 tasks | 3 files |
 | Phase 07.5 P01 | 7 | 2 tasks | 6 files |
 | Phase 07.5-inline-serialisation-support-via-humloptions-and-humlproperty P02 | 3min | 2 tasks | 2 files |
+| Phase 07.6 P01 | 5 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -132,6 +133,8 @@ Recent decisions affecting current work:
 - [Phase 07.5]: PropertyDescriptor.Inline remains bool? — converted from InlineMode via switch at BuildDescriptors time, keeping serializer dispatch simple
 - [Phase 07.5]: InlineMode in separate InlineMode.cs file — Meziantou MA0048 enforces one-type-per-file under TreatWarningsAsErrors
 - [Phase 07.5]: SerializeDictionaryBody passes inlineOverride: false to EmitEntry — inline is a POCO-property-level concern, not recursive into dict body entries; inner scalar lists within a complex dict body emit multiline
+- [Phase 07.6]: BeApproximately(6.022e+23, 1e+17) used for large-exponent float round-trip; exact .Be() works for all others
+- [Phase 07.6]: SpecialKeysWrapper/EdgeCaseKeysWrapper POCOs wrap Dictionary<string,string> for quoted-key round-trip tests
 
 ### Roadmap Evolution
 
@@ -155,6 +158,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-22T21:51:08.485Z
-Stopped at: Completed 07.5-02-PLAN.md
+Last session: 2026-03-22T22:40:38.287Z
+Stopped at: Completed 07.6-01-PLAN.md
 Resume file: None
