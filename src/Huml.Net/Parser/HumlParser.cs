@@ -2,7 +2,6 @@ using System.Globalization;
 using Huml.Net.Exceptions;
 using Huml.Net.Lexer;
 using Huml.Net.Versioning;
-using Huml.Net.Versioning.Exceptions;
 
 namespace Huml.Net.Parser;
 
@@ -173,10 +172,8 @@ internal sealed class HumlParser
 
             case TokenType.Key:
             case TokenType.QuotedKey:
-                // Consume key + indicator to decide between dict types, then restore state
-                // via a second Lexer call. Since we cannot unread, we peek at what follows
-                // by reading ahead: key token → advance → read indicator token.
-                return InferDictRootType();
+                // Inline detection deferred to ParseMappingEntries via inlineLine tracking
+                return RootType.MultilineDict;
 
             default:
                 // Value token — check if followed by comma (inline list) or not (root scalar)
@@ -186,40 +183,6 @@ internal sealed class HumlParser
                 throw new HumlParseException(
                     $"Unexpected token '{tk.Type}' at root.", tk.Line, tk.Column);
         }
-    }
-
-    /// <summary>
-    /// Consumes the key and indicator tokens to determine whether the root dict is
-    /// multiline or inline, then stores the consumed tokens for replay via a
-    /// two-item lookahead buffer.
-    /// </summary>
-    private static RootType InferDictRootType()
-    {
-        // We cannot un-read from the lexer, so we peek token-by-token and store
-        // the read tokens in a small replay buffer. We resolve by inspecting whether
-        // the vector indicator is at end-of-line (multiline dict) or not (inline dict).
-        // If scalar indicator: the value follows on the same line → multiline dict
-        // (scalar values are single-line; the dict has one or more mappings).
-        //
-        // Since the only meaningful distinction for root dict type is
-        // MultilineDict vs InlineDict, and we know the root starts with a Key/QuotedKey,
-        // we check whether there is a VectorIndicator whose value follows inline.
-        //
-        // Note: we do not actually need to peek further than the indicator here —
-        // the distinction is made during ParseMappingEntries / ParseVector.
-        // Both produce a HumlDocument. We always return MultilineDict for
-        // Key/QuotedKey roots; ParseMappingEntries handles single-line entries naturally.
-        //
-        // For inline dict at root (e.g., "a: 1, b: 2"): the lexer will emit
-        // Key, ScalarIndicator, Int, Comma, ... — we can detect the comma after the first
-        // value to know it's an inline dict. However, ParseMultilineDict already handles
-        // a mapping followed by more mappings (it loops). The inline dict root case
-        // only applies when there are commas on the SAME LINE as the first key.
-        //
-        // Since HUML inline dict at root level uses commas and single-line form,
-        // and the standard case for multi-mapping docs uses newlines, we default
-        // to MultilineDict here — ParseMappingEntries will exit after EOF naturally.
-        return RootType.MultilineDict;
     }
 
     /// <summary>

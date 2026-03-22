@@ -1,5 +1,5 @@
 using AwesomeAssertions;
-using Huml.Net.Versioning.Exceptions;
+using Huml.Net.Exceptions;
 using Xunit;
 
 namespace Huml.Net.Tests.Versioning;

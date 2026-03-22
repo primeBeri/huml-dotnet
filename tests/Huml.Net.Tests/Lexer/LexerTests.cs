@@ -402,4 +402,13 @@ public class LexerTests
         tokens[0].Type.Should().Be(TokenType.Int);
         tokens[0].Value.Should().Be("123");
     }
+
+    [Fact]
+    public void MeasureIndent_500_consecutive_blank_lines_does_not_overflow()
+    {
+        // 500 blank lines followed by a simple key-value pair
+        var input = new string('\n', 500) + "key: \"value\"";
+        var act = () => Huml.Parse(input, HumlOptions.Default);
+        act.Should().NotThrow();
+    }
 }

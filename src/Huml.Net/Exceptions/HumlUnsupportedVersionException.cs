@@ -1,4 +1,6 @@
-namespace Huml.Net.Versioning.Exceptions;
+using Huml.Net.Versioning;
+
+namespace Huml.Net.Exceptions;
 
 /// <summary>
 /// Thrown when a HUML document declares a spec version outside the supported range

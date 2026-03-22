@@ -155,49 +155,52 @@ internal sealed class Lexer
 
     private int MeasureIndent()
     {
-        int indent = 0;
-        int p = _pos;
-        while (p < _source.Length)
+        while (true)
         {
-            char c = _source[p];
-            if (c == '\t')
+            int indent = 0;
+            int p = _pos;
+            while (p < _source.Length)
             {
-                _pos = p;
-                _col = indent;
-                ThrowTabError();
+                char c = _source[p];
+                if (c == '\t')
+                {
+                    _pos = p;
+                    _col = indent;
+                    ThrowTabError();
+                }
+                if (c != ' ')
+                    break;
+                indent++;
+                p++;
             }
-            if (c != ' ')
-                break;
-            indent++;
-            p++;
-        }
-        // If the line is blank (only spaces followed by \n or EOF), check for trailing whitespace
-        if (p < _source.Length && _source[p] == '\n')
-        {
-            if (indent > 0)
+            // If the line is blank (only spaces followed by \n or EOF), check for trailing whitespace
+            if (p < _source.Length && _source[p] == '\n')
             {
-                // Trailing whitespace on blank line
-                _pos = p - indent + indent; // position at the spaces
+                if (indent > 0)
+                {
+                    // Trailing whitespace on blank line
+                    _pos = p - indent + indent; // position at the spaces
+                    _col = 0;
+                    ThrowTrailingWhitespaceError(indent);
+                }
+                // blank line — advance past it and loop (replaces tail recursion)
+                _pos = p + 1;
+                _line++;
+                _col = 0;
+                continue;
+            }
+            else if (p >= _source.Length && indent > 0)
+            {
+                // trailing spaces at EOF
+                _pos = p - indent;
                 _col = 0;
                 ThrowTrailingWhitespaceError(indent);
             }
-            // blank line — advance past it
-            _pos = p + 1;
-            _line++;
-            _col = 0;
-            return MeasureIndent(); // recurse for next line
-        }
-        else if (p >= _source.Length && indent > 0)
-        {
-            // trailing spaces at EOF
-            _pos = p - indent;
-            _col = 0;
-            ThrowTrailingWhitespaceError(indent);
-        }
 
-        _pos = p;
-        _col = indent;
-        return indent;
+            _pos = p;
+            _col = indent;
+            return indent;
+        }
     }
 
     private Token ScanVersionDirective()
