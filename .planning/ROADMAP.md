@@ -175,15 +175,7 @@ Plans:
 - [x] 07.5-01-PLAN.md — Contracts: CollectionFormat enum, HumlOptions.CollectionFormat, HumlPropertyAttribute.Inline, PropertyDescriptor.Inline cache, test stubs (INL-01, INL-02, INL-03, INL-04, INL-07, INL-08, INL-12)
 - [x] 07.5-02-PLAN.md — Implementation: EmitEntry inline dispatch, EmitInlineSequence, EmitInlineDictionary, all tests green, docs/inline-serialisation.md (INL-05, INL-06, INL-07, INL-08, INL-09, INL-10, INL-11, INL-12, INL-13)
 
-### Phase 07.6: Comprehensive round-trip tests against mixed fixture files (INSERTED)
-
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
-**Depends on:** Phase 07.5
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 07.6 to break down)
+### Phase 07.6: Comprehensive round-trip tests against mixed fixture files (INSERTED)**Goal:** Add comprehensive round-trip tests that exercise fixtures/v0.2/documents/mixed.huml and fixtures/v0.2/documents/mixed.json as a kitchen-sink harness, plus equivalent v0.1 coverage. Extend Phase 07.5 inline tests from NotThrow-only to full value-equality round-trips.**Requirements**: MIX-01, MIX-02, MIX-03, MIX-04, MIX-05**Depends on:** Phase 07.5**Plans:** 1 planPlans:- [ ] 07.6-01-PLAN.md — Parse verification, typed sub-section round-trips, and inline value-equality tests (MIX-01, MIX-02, MIX-03, MIX-04, MIX-05)
 
 ### Phase 07.7: Documentation suite for first public NuGet release (INSERTED)
 
