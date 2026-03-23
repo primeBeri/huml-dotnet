@@ -186,7 +186,7 @@ Plans:
 
 Plans:
 - [x] 07.7-01-PLAN.md — README.md, CHANGELOG.md, and 5 new docs/ guides (API-04)
-- [ ] 07.7-02-PLAN.md — Huml.Net.csproj metadata patch, inline-serialisation review, dotnet pack verification (API-04, API-05)
+- [x] 07.7-02-PLAN.md — Huml.Net.csproj metadata patch, inline-serialisation review, dotnet pack verification (API-04, API-05)
 
 ### Phase 8: NuGet Release Preparation
 **Goal**: The NuGet package is verified complete -- correct TFM coverage, working SourceLink, embedded XML docs, and a successful pre-release publish to NuGet.org via OIDC Trusted Publishing
