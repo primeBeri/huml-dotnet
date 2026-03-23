@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Huml.Net.Tests", "tests\Huml.Net.Tests\Huml.Net.Tests.csproj", "{6A99288C-00BE-4300-ACBD-AABF4CB31630}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HumlScratchpad", "HumlScratchpad\HumlScratchpad.csproj", "{66B6A038-BAFC-42F0-B6EC-E25E6AD3D4D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,18 @@ Global
 		{6A99288C-00BE-4300-ACBD-AABF4CB31630}.Release|x64.Build.0 = Release|Any CPU
 		{6A99288C-00BE-4300-ACBD-AABF4CB31630}.Release|x86.ActiveCfg = Release|Any CPU
 		{6A99288C-00BE-4300-ACBD-AABF4CB31630}.Release|x86.Build.0 = Release|Any CPU
+		{66B6A038-BAFC-42F0-B6EC-E25E6AD3D4D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66B6A038-BAFC-42F0-B6EC-E25E6AD3D4D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66B6A038-BAFC-42F0-B6EC-E25E6AD3D4D1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{66B6A038-BAFC-42F0-B6EC-E25E6AD3D4D1}.Debug|x64.Build.0 = Debug|Any CPU
+		{66B6A038-BAFC-42F0-B6EC-E25E6AD3D4D1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{66B6A038-BAFC-42F0-B6EC-E25E6AD3D4D1}.Debug|x86.Build.0 = Debug|Any CPU
+		{66B6A038-BAFC-42F0-B6EC-E25E6AD3D4D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66B6A038-BAFC-42F0-B6EC-E25E6AD3D4D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66B6A038-BAFC-42F0-B6EC-E25E6AD3D4D1}.Release|x64.ActiveCfg = Release|Any CPU
+		{66B6A038-BAFC-42F0-B6EC-E25E6AD3D4D1}.Release|x64.Build.0 = Release|Any CPU
+		{66B6A038-BAFC-42F0-B6EC-E25E6AD3D4D1}.Release|x86.ActiveCfg = Release|Any CPU
+		{66B6A038-BAFC-42F0-B6EC-E25E6AD3D4D1}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

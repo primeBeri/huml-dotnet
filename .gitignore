@@ -57,3 +57,6 @@ nunit-*.xml
 .planning/
 !.planning/config.json
 !.planning/PROJECT.md
+
+#Huml Scratchpad
+HumlScratchpad/
