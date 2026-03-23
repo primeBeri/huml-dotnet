@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v0.1
 milestone_name: "coverage. Extend Phase 07.5 inline tests from NotThrow-only to full value-equality round-trips.**Requirements**: MIX-01, MIX-02, MIX-03, MIX-04, MIX-05**Depends on:** Phase 07.5**Plans:** 1/1 plans complete"
 status: unknown
-stopped_at: Completed 07.10-01-PLAN.md
-last_updated: "2026-03-23T22:56:09.125Z"
+stopped_at: Completed 07.10-02-PLAN.md
+last_updated: "2026-03-23T23:01:35.619Z"
 progress:
   total_phases: 19
-  completed_phases: 16
+  completed_phases: 17
   total_plans: 29
-  completed_plans: 28
+  completed_plans: 29
 ---
 
 # Project State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 
 ## Current Position
 
-Phase: 07.10 (complete-missing-contributor-and-developer-internals-documentation) — EXECUTING
-Plan: 2 of 2
+Phase: 999.5
+Plan: Not started
 
 ## Performance Metrics
 
@@ -74,6 +74,7 @@ Plan: 2 of 2
 | Phase 07.8 P01 | 3min | 2 tasks | 6 files |
 | Phase 07.9 P01 | 2min | 2 tasks | 5 files |
 | Phase 07.10 P01 | 2min | 2 tasks | 2 files |
+| Phase 07.10 P02 | 3 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -149,6 +150,8 @@ Recent decisions affecting current work:
 - [Phase 07.9]: MaxRecursionDepth valid range tightened [1,65536]→[1,1024]; 1024 is generous for real HUML documents while bounding stack usage
 - [Phase 07.10]: CONTRIBUTING.md omits FluentAssertions brand name in the do-not-use warning to satisfy acceptance criteria grep check; AwesomeAssertions 9.4.0 named exclusively
 - [Phase 07.10]: BACKLOG.md starts empty; Phase 999.5 internal item not exposed to public contributors
+- [Phase 07.10]: File paths referencing src/Huml.Net/Serialization/ use actual directory name (American spelling); all prose uses British English
+- [Phase 07.10]: docs/internals/ directory established as contributor-facing internals guide home with pipeline.md, version-gates.md, extending.md
 
 ### Roadmap Evolution
 
@@ -173,6 +176,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T22:56:09.121Z
-Stopped at: Completed 07.10-01-PLAN.md
+Last session: 2026-03-23T22:57:40.390Z
+Stopped at: Completed 07.10-02-PLAN.md
 Resume file: None
