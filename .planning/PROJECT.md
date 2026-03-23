@@ -34,7 +34,7 @@ Full HUML spec compliance (v0.1 + v0.2), validated against the shared `huml-lang
 - [x] Serialiser hot-path allocations reduced: `AppendEscapedString` (no intermediate string), `PropertyDescriptor.DefaultValue` cached at build time — Validated in Phase 07.2: Code Quality, API Accuracy and Performance Optimisations
 - [x] `HumlInlineMapping` AST node disambiguates inline/empty dict values from root `HumlDocument` — Validated in Phase 07.2: Code Quality, API Accuracy and Performance Optimisations
 - [x] `HumlUnsupportedVersionException` in canonical `Huml.Net.Exceptions` namespace — Validated in Phase 07.2: Code Quality, API Accuracy and Performance Optimisations
-- [x] `MaxRecursionDepth` validates range `[1, 65536]` at construction time — Validated in Phase 07.2: Code Quality, API Accuracy and Performance Optimisations
+- [x] `MaxRecursionDepth` validates range `[1, 1024]` at construction time — Validated in Phase 07.2 (introduced), tightened in Phase 07.9
 - [x] Actionable error message for non-ASCII letter at bare-key position ("Bare keys must start with [a-zA-Z]") — Validated in Phase 07.3: Unicode and RTL Support with Fixture Extensions
 - [x] `fixtures/extensions/` infrastructure with 11 gap assertions and 17 Unicode/RTL assertions, integrated into SharedSuiteTests via extension scan — Validated in Phase 07.3: Unicode and RTL Support with Fixture Extensions
 - [x] `HumlSerializer` emits quoted keys for non-bare-key strings (non-ASCII, digit-start, spaces, empty, colon-containing); bare keys remain unquoted (no regression); `Dictionary<string,T>` with non-ASCII keys round-trips with value equality — Validated in Phase 07.4: Fix HumlSerializer Key Quoting (D-08 closed)
@@ -46,6 +46,8 @@ Full HUML spec compliance (v0.1 + v0.2), validated against the shared `huml-lang
 - [x] Comprehensive round-trip tests against mixed fixture documents (v0.1 + v0.2): parse verification, typed sub-section value-equality (integers, floats, strings, booleans, nulls, 3-level nesting, edge-case keys), inline serialisation value-equality (lists, dicts, attribute overrides) — Validated in Phase 07.6: Comprehensive Round-Trip Tests Against Mixed Fixture Files
 - [x] NuGet-publishable: production-quality README.md (109 lines, code examples, compatibility table), CHANGELOG.md (Keep a Changelog 1.1.0), 6 docs/ guides (options, versioning, AST usage, error handling, inline serialisation, publish checklist), `Huml.Net.csproj` metadata patched (author, pitch description, repository URLs), `dotnet pack` verified clean across all 4 TFMs — Validated in Phase 07.7: Documentation Suite for First Public NuGet Release
 - [x] `HumlOptions.Default` is header-aware (`VersionSource.Header`, falls back to v0.2); `HumlOptions.LatestSupported` is pinned v0.2 (`VersionSource.Options`); `HumlOptions.AutoDetect` is a reference-equal alias for `Default` — Validated in Phase 07.8: Make HumlOptions.Default Use AutoDetect Behaviour
+- [x] `MaxRecursionDepth` default lowered from 512 to 64 (matches `System.Text.Json` convention); valid range tightened to `[1, 1024]`; regression test guards old ceiling (65536 now throws) — Validated in Phase 07.9: Lower MaxRecursionDepth Default and Tighten Range
+- [x] `CONTRIBUTING.md` (9-section contributor onboarding: `--recurse-submodules`, AwesomeAssertions, TreatWarningsAsErrors, AI contributions welcome, links to `docs/internals/`), `BACKLOG.md` (triage workflow + empty table), and three `docs/internals/` guides (pipeline overview, version gates, extending the library) — Validated in Phase 07.10: Complete Missing Contributor and Developer Internals Documentation
 
 ### Active
 
@@ -88,4 +90,4 @@ Full HUML spec compliance (v0.1 + v0.2), validated against the shared `huml-lang
 | `SpecVersionPolicy` constants as code | `HumlUnsupportedVersionException` references them directly — error message stays accurate without manual updates | — Pending |
 
 ---
-*Last updated: 2026-03-23 — Phase 07.8 complete: `HumlOptions.Default` reassigned to header-aware (`VersionSource.Header`). `LatestSupported` introduced for pinned v0.2. `AutoDetect` is now a reference alias for `Default`. 708 tests green across net8.0/net9.0/net10.0.*
+*Last updated: 2026-03-23 — Phase 07.10 complete: `CONTRIBUTING.md`, `BACKLOG.md`, and three `docs/internals/` guides (pipeline, version-gates, extending) added. All contributor-facing documentation in place for first public NuGet release. 711 tests green across net8.0/net9.0/net10.0.*
