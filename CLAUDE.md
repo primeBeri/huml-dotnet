@@ -79,7 +79,7 @@ All nodes in `src/Huml.Net/Parser/` are `public sealed record` types:
 
 `HumlSpecVersion` is an `int`-backed enum (`V0_1 = 1`, `V0_2 = 2`). Version gates inside the Lexer and Parser use the pattern `>= HumlSpecVersion.V0_2` — there are **no forked classes**, just conditional branches within the single code path. `V0_1` is marked `[Obsolete]`.
 
-`HumlOptions` carries `SpecVersion`, `VersionSource` (Options vs Header), `UnknownVersionBehaviour`, and `MaxRecursionDepth`. Use `HumlOptions.Default` (v0.2, Throw on unknown) or `HumlOptions.AutoDetect` (reads from `%HUML` header) in tests.
+`HumlOptions` carries `SpecVersion`, `VersionSource` (Options vs Header), `UnknownVersionBehaviour`, and `MaxRecursionDepth`. Use `HumlOptions.Default` (reads `%HUML` header, falls back to v0.2) or `HumlOptions.LatestSupported` (pinned v0.2, ignores header) in tests. `HumlOptions.AutoDetect` is a reference-equal alias for `Default`.
 
 When referencing `HumlSpecVersion.V0_1` in implementation or tests, suppress `CS0618` with a targeted `#pragma warning disable/restore CS0618`.
 
