@@ -208,6 +208,17 @@ Plans:
 Plans:
 - [x] 07.9-01-PLAN.md — Lower MaxRecursionDepth default to 64, tighten upper bound to 1024, update tests and docs (DEPTH-01, DEPTH-02, DEPTH-03)
 
+### Phase 07.10: Complete missing contributor and developer-internals documentation (INSERTED)
+
+**Goal:** Write the remaining documentation from `PLAN-documentation.md` that was not included in Phase 07.7: `CONTRIBUTING.md`, `BACKLOG.md`, and the three `docs/internals/` guides (`pipeline.md`, `version-gates.md`, `extending.md`) — completing the full documentation suite for the first public release
+**Requirements:** DOC-01, DOC-02, DOC-03, DOC-04, DOC-05
+**Depends on:** Phase 07.9
+**Plans:** 1/2 plans executed
+
+Plans:
+- [x] 07.10-01-PLAN.md — CONTRIBUTING.md and BACKLOG.md (DOC-01, DOC-02)
+- [ ] 07.10-02-PLAN.md — docs/internals/ guides: pipeline.md, version-gates.md, extending.md (DOC-03, DOC-04, DOC-05)
+
 ### Phase 8: NuGet Release Preparation
 **Goal**: The NuGet package is verified complete -- correct TFM coverage, working SourceLink, embedded XML docs, and a successful pre-release publish to NuGet.org via OIDC Trusted Publishing
 **Depends on**: Phase 7
@@ -236,7 +247,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 6. Attributes and Serializer/Deserializer                      | 3/3            | Complete    | 2026-03-21 |
 | 7. Static Entry Point and Shared Fixture Compliance            | 2/2            | Complete    | 2026-03-22 |
 | 07.8. HumlOptions.Default -> AutoDetect, LatestSupported rename | 1/1 | Complete    | 2026-03-23 |
-| 07.9. Lower MaxRecursionDepth default to 64                    | 1/1 | Complete   | 2026-03-23 |
+| 07.9. Lower MaxRecursionDepth default to 64                    | 1/1 | Complete    | 2026-03-23 |
+| 07.10. Contributor and internals documentation                 | 1/2 | In Progress|  |
 | 8. NuGet Release Preparation                                   | 0/?            | Not started | -          |
 
 ## Backlog

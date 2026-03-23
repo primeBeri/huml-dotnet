@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v0.1
 milestone_name: "coverage. Extend Phase 07.5 inline tests from NotThrow-only to full value-equality round-trips.**Requirements**: MIX-01, MIX-02, MIX-03, MIX-04, MIX-05**Depends on:** Phase 07.5**Plans:** 1/1 plans complete"
 status: unknown
-stopped_at: Completed 07.9-01-PLAN.md
-last_updated: "2026-03-23T22:27:07.018Z"
+stopped_at: Completed 07.10-01-PLAN.md
+last_updated: "2026-03-23T22:56:09.125Z"
 progress:
-  total_phases: 18
+  total_phases: 19
   completed_phases: 16
-  total_plans: 27
-  completed_plans: 27
+  total_plans: 29
+  completed_plans: 28
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** Full HUML spec compliance (v0.1 + v0.2), validated against the shared `huml-lang/tests` test suite, with zero external runtime dependencies and a `System.Text.Json`-style API that .NET developers already know.
-**Current focus:** Phase 07.9 — lower-maxrecursiondepth-default-from-512-to-64-and-tighten-valid-range-upper-bound
+**Current focus:** Phase 07.10 — complete-missing-contributor-and-developer-internals-documentation
 
 ## Current Position
 
-Phase: 07.9 (lower-maxrecursiondepth-default-from-512-to-64-and-tighten-valid-range-upper-bound) — EXECUTING
-Plan: 1 of 1
+Phase: 07.10 (complete-missing-contributor-and-developer-internals-documentation) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Plan: 1 of 1
 | Phase 07.7 P02 | 5min | 2 tasks | 1 files |
 | Phase 07.8 P01 | 3min | 2 tasks | 6 files |
 | Phase 07.9 P01 | 2min | 2 tasks | 5 files |
+| Phase 07.10 P01 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -146,6 +147,8 @@ Recent decisions affecting current work:
 - [Phase 07.8]: HumlOptions.Default reassigned to VersionSource.Header; LatestSupported added for pinned-v0.2 behaviour; AutoDetect is reference-equal alias to Default
 - [Phase 07.9]: MaxRecursionDepth default lowered 512→64 to match System.Text.Json.JsonSerializerOptions.MaxDepth convention and bound adversarial inputs
 - [Phase 07.9]: MaxRecursionDepth valid range tightened [1,65536]→[1,1024]; 1024 is generous for real HUML documents while bounding stack usage
+- [Phase 07.10]: CONTRIBUTING.md omits FluentAssertions brand name in the do-not-use warning to satisfy acceptance criteria grep check; AwesomeAssertions 9.4.0 named exclusively
+- [Phase 07.10]: BACKLOG.md starts empty; Phase 999.5 internal item not exposed to public contributors
 
 ### Roadmap Evolution
 
@@ -156,6 +159,7 @@ Recent decisions affecting current work:
 - Phase 07.5 inserted after Phase 07.4: Inline serialisation support via HumlOptions and HumlProperty (INSERTED)
 - Phase 07.6 inserted after Phase 07.5: Comprehensive round-trip tests against mixed fixture files (INSERTED)
 - Phase 07.7 inserted after Phase 07.6: Documentation suite for first public NuGet release (INSERTED)
+- Phase 07.10 added: Complete missing contributor and developer-internals documentation (CONTRIBUTING.md, BACKLOG.md, docs/internals/)
 
 ### Pending Todos
 
@@ -169,6 +173,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T22:27:07.015Z
-Stopped at: Completed 07.9-01-PLAN.md
+Last session: 2026-03-23T22:56:09.121Z
+Stopped at: Completed 07.10-01-PLAN.md
 Resume file: None
