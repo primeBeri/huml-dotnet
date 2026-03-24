@@ -261,3 +261,159 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
+
+### Phase 999.6: Fix Serialize(object?, Type) ignores Type parameter (BACKLOG)
+
+**Goal:** Implement type-directed dispatch in `HumlSerializer.Serialize(object?, Type, HumlOptions?)` so that the declared `Type` parameter governs property reflection rather than the runtime type. Fixes a silent API contract violation where polymorphic callers (serialising a derived instance via a base `Type`) receive the wrong output. Mirrors `System.Text.Json` behaviour.
+**Source:** ArchitectureReview_20260324.md §2.3, §9 Phase 1 Task 1.1
+**Version:** V1 | **Priority:** High | **Category:** API
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
+
+### Phase 999.7: Document ReadOnlySpan deserialise allocation at public API boundary (BACKLOG)
+
+**Goal:** Add `<remarks>` XML doc to `Huml.Deserialize<T>(ReadOnlySpan<char>, HumlOptions?)` (`Huml.cs:48`) clearly stating that the span is converted to a `string` internally and that genuine zero-copy is a future enhancement (v2). Sets correct consumer expectations without breaking the current API.
+**Source:** ArchitectureReview_20260324.md §2.3, §9 Phase 1 Task 1.2
+**Version:** V1 | **Priority:** Medium | **Category:** Documentation
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
+
+### Phase 999.8: Document HumlDocument dual role as root and nested mapping block (BACKLOG)
+
+**Goal:** Add XML `<summary>` and `<remarks>` to `HumlDocument.cs` clarifying that the type represents both the document root AND nested multiline mapping blocks. Add a complementary note to `HumlInlineMapping.cs` clarifying it is for inline `{k: v}` and empty `{}` notation only. Prevents future contributor confusion.
+**Source:** ArchitectureReview_20260324.md §2.2, §9 Phase 1 Task 1.3
+**Version:** V1 | **Priority:** Low | **Category:** Documentation
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
+
+### Phase 999.9: Add property-lookup dictionary to PropertyDescriptor cache for O(1) deserialiser lookup (BACKLOG)
+
+**Goal:** Extend `PropertyDescriptor.BuildDescriptors` to build a `Dictionary<string, PropertyDescriptor>` keyed by `HumlKey` alongside the existing ordered array. Cache both together. Update `HumlDeserializer` to use the dictionary for O(1) key lookup instead of the current O(n) `foreach` loop. The array is preserved for the serialiser (declaration-order traversal).
+**Source:** ArchitectureReview_20260324.md §2.3, §5.1, §9 Phase 2 Task 2.1
+**Version:** V1 | **Priority:** Low | **Category:** Performance
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
+
+### Phase 999.10: Cache indent strings in HumlSerializer to eliminate per-call allocation (BACKLOG)
+
+**Goal:** Replace the `Indent(int depth)` method in `HumlSerializer.cs` (currently `new string(' ', depth * 2)` on every call) with a pre-computed `static readonly string[]` of 65 entries. Falls back to dynamic allocation only beyond depth 64. Eliminates O(n) identical string allocations for typical documents.
+**Source:** ArchitectureReview_20260324.md §5.1, §9 Phase 2 Task 2.2
+**Version:** V1 | **Priority:** Low | **Category:** Performance
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
+
+### Phase 999.11: Pool StringBuilder in serialiser via [ThreadStatic] (BACKLOG)
+
+**Goal:** Replace per-call `new StringBuilder()` allocation in `HumlSerializer` with a `[ThreadStatic]` pooled instance (or `ObjectPool<StringBuilder>` if the zero-dependency constraint permits). Reduces GC pressure for high-throughput serialisation scenarios. Requires careful `Clear()` discipline to avoid cross-call contamination.
+**Source:** ArchitectureReview_20260324.md §5.1, §9 Phase 2 Task 2.3
+**Version:** V2 | **Priority:** Medium | **Category:** Performance
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
+
+### Phase 999.12: Refactor Lexer to ref struct accepting ReadOnlySpan<char> for zero-copy deserialisation (BACKLOG)
+
+**Goal:** Implement a `ref struct` `Lexer` variant that accepts `ReadOnlySpan<char>` as its core input, eliminating the `.ToString()` heap allocation in `HumlDeserializer.cs:38`. Thread the span path through `HumlParser` and `HumlDeserializer` so that `Huml.Deserialize<T>(ReadOnlySpan<char>)` produces no intermediate string allocation. The string overload delegates to the span path. Verify with allocation-count tests.
+**Source:** ArchitectureReview_20260324.md §2.3, §5.1, §9 Phase 3 Tasks 3.1–3.2
+**Version:** V2 | **Priority:** High | **Category:** Performance
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
+
+### Phase 999.13: Carry source position through AST nodes for richer HumlDeserializeException diagnostics (BACKLOG)
+
+**Goal:** Add `Line` and `Column` properties to all AST node records (`HumlMapping`, `HumlScalar`, `HumlSequence`, `HumlDocument`). Propagate position from the Lexer's `Token` through the Parser into AST nodes. Update `HumlDeserializer` to use AST node positions when throwing `HumlDeserializeException`, replacing the current hardcoded `line: 0` with the actual source position.
+**Source:** ArchitectureReview_20260324.md §7.3, §9 Phase 4 Task 4.1
+**Version:** V2 | **Priority:** Medium | **Category:** Diagnostics
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
+
+### Phase 999.14: Add HumlOptions factory for header-detected latest-fallback variant (BACKLOG)
+
+**Goal:** Add a `HumlOptions.LatestSupportedAutoDetect` static factory (or named instance) representing "read `%HUML` header, fall back to latest supported version". Currently this combination requires constructing a custom `HumlOptions` instance. The addition is additive — existing `Default`/`AutoDetect`/`LatestSupported` names are unchanged.
+**Source:** ArchitectureReview_20260324.md §7.2, §9 Phase 4 Task 4.2
+**Version:** V2 | **Priority:** Low | **Category:** API
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
+
+### Phase 999.15: Add concurrency test for PropertyDescriptor cache under parallel deserialisation (BACKLOG)
+
+**Goal:** Add a test that calls `Huml.Deserialize<T>` from 16 concurrent threads simultaneously, exercising the `ConcurrentDictionary.GetOrAdd` race in `PropertyDescriptor.BuildDescriptors`. Assert no exceptions and no data corruption. Complements the existing `ClearCache()` test isolation pattern.
+**Source:** ArchitectureReview_20260324.md §8.3, §9 Phase 4 Task 4.3
+**Version:** V2 | **Priority:** Low | **Category:** Testing
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
+
+### Phase 999.16: Add CHANGELOG.md with version history derived from git tags (BACKLOG)
+
+**Goal:** Create `CHANGELOG.md` at the repository root following Keep a Changelog conventions. Populate initial entries from git tag history and commit messages. Add a note to `CONTRIBUTING.md` instructing contributors to update the changelog for user-facing changes. Provides human-readable version history for NuGet consumers who can't read git tags directly.
+**Source:** ArchitectureReview_20260324.md §8.2
+**Version:** V1 | **Priority:** Low | **Category:** Documentation
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+---
+
+### Phase 999.17: Document uncapped document size limitation and consider MaxDocumentSize option (BACKLOG)
+
+**Goal:** Add a note to `docs/options-reference.md` and `HumlOptions` XML docs warning that no maximum document size is enforced. Evaluate whether an optional `MaxDocumentSize` (bytes or chars) property should be added to `HumlOptions` to guard against memory exhaustion from untrusted inputs. Any implementation must be a non-breaking additive change with `null` default (unlimited).
+**Source:** ArchitectureReview_20260324.md §6.1
+**Version:** V2 | **Priority:** Low | **Category:** Security
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
