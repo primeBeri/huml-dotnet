@@ -86,6 +86,21 @@ public class HumlSerializerTests
         public string? Text { get; set; }
     }
 
+    private class PolymorphicBase
+    {
+        public string? Name { get; set; }
+    }
+
+    private class PolymorphicDerived : PolymorphicBase
+    {
+        public int Extra { get; set; }
+    }
+
+    private class NestingPoco
+    {
+        public PolymorphicBase? Child { get; set; }
+    }
+
     // ── Constructor ───────────────────────────────────────────────────────────
 
     public HumlSerializerTests()
@@ -447,5 +462,31 @@ public class HumlSerializerTests
         var resultTyped = HumlSerializer.Serialize(poco, typeof(OrderedPoco), HumlOptions.Default);
 
         resultTyped.Should().Be(resultUntyped);
+    }
+
+    // ── Polymorphic declared-type dispatch ────────────────────────────────────
+
+    [Fact]
+    public void Serialize_DeclaredBaseType_OmitsDerivedOnlyProperties()
+    {
+        var value = new PolymorphicDerived { Name = "Alice", Extra = 99 };
+        var result = HumlSerializer.Serialize(value, typeof(PolymorphicBase), HumlOptions.LatestSupported);
+        result.Should().NotContain("Extra");
+    }
+
+    [Fact]
+    public void Serialize_DeclaredBaseType_IncludesBaseProperties()
+    {
+        var value = new PolymorphicDerived { Name = "Bob", Extra = 42 };
+        var result = HumlSerializer.Serialize(value, typeof(PolymorphicBase), HumlOptions.LatestSupported);
+        result.Should().Contain("Name: \"Bob\"");
+    }
+
+    [Fact]
+    public void Serialize_DeclaredBaseType_NestedPocoUsesRuntimeType()
+    {
+        var nesting = new NestingPoco { Child = new PolymorphicDerived { Name = "nested", Extra = 42 } };
+        var result = HumlSerializer.Serialize(nesting, typeof(NestingPoco), HumlOptions.LatestSupported);
+        result.Should().Contain("Extra");
     }
 }
