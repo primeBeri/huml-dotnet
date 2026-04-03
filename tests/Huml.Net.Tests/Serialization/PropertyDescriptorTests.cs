@@ -140,4 +140,44 @@ public class PropertyDescriptorTests
 
         descriptors[0].OmitIfDefault.Should().BeFalse();
     }
+
+    [Fact]
+    public void GetLookup_ReturnsDictionaryKeyedByHumlKey()
+    {
+        var lookup = PropertyDescriptor.GetLookup(typeof(SimplePoco));
+
+        lookup.Should().HaveCount(3);
+        lookup.Should().ContainKey("Zebra");
+        lookup.Should().ContainKey("Alpha");
+        lookup.Should().ContainKey("Middle");
+        lookup["Zebra"].HumlKey.Should().Be("Zebra");
+    }
+
+    [Fact]
+    public void GetLookup_ReturnsSameReferenceOnSecondCall()
+    {
+        var first = PropertyDescriptor.GetLookup(typeof(SimplePoco));
+        var second = PropertyDescriptor.GetLookup(typeof(SimplePoco));
+
+        object.ReferenceEquals(first, second).Should().BeTrue();
+    }
+
+    [Fact]
+    public void GetLookup_RenamedProperty_UsesHumlKeyNotPropertyName()
+    {
+        var lookup = PropertyDescriptor.GetLookup(typeof(RenamedPoco));
+
+        lookup.Should().ContainKey("custom_name");
+        lookup.Should().NotContainKey("Original");
+    }
+
+    [Fact]
+    public void ClearCache_ClearsLookupDictionary()
+    {
+        var first = PropertyDescriptor.GetLookup(typeof(SimplePoco));
+        PropertyDescriptor.ClearCache();
+        var second = PropertyDescriptor.GetLookup(typeof(SimplePoco));
+
+        object.ReferenceEquals(first, second).Should().BeFalse();
+    }
 }

@@ -249,10 +249,10 @@ Plans:
 **Goal:** Add XML `<summary>` and `<remarks>` to `HumlDocument.cs` clarifying that the type represents both the document root AND nested multiline mapping blocks. Add a complementary remark to `HumlInlineMapping.cs` clarifying it is for inline `{k: v}` and empty `{}` notation only. Prevents future contributor confusion.
 **Requirements:** DOC-AST-01
 **Depends on:** Phase 07.12
-**Plans:** 0 plans
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] TBD
+- [x] 07.13-01-PLAN.md — Update XML docs on HumlDocument and HumlInlineMapping for dual-role clarity (DOC-AST-01)
 
 ---
 
@@ -311,8 +311,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 07.9. Lower MaxRecursionDepth default to 64                    | 1/1 | Complete    | 2026-03-23 |
 | 07.10. Contributor and internals documentation                 | 2/2 | Complete    | 2026-03-23 |
 | 07.11. Fix Serialize(object?,Type) ignores Type parameter      | 0/? | Complete    | 2026-03-25 |
-| 07.12. Document ReadOnlySpan deserialise allocation            | 1/1 | Complete   | 2026-03-31 |
-| 07.13. Document HumlDocument dual role                         | 0/? | Not started | -          |
+| 07.12. Document ReadOnlySpan deserialise allocation            | 1/1 | Complete   | 2026-04-03 |
+| 07.13. Document HumlDocument dual role                         | 1/1 | Complete   | 2026-04-03 |
 | 07.14. O(1) property-lookup dictionary in PropertyDescriptor   | 0/? | Not started | -          |
 | 07.15. Cache indent strings in HumlSerializer                  | 0/? | Not started | -          |
 | 8. NuGet Release Preparation                                   | 0/?            | Not started | -          |

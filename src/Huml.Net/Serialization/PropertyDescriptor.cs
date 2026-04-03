@@ -22,7 +22,16 @@ internal sealed record PropertyDescriptor(
 {
     // ── Cache ─────────────────────────────────────────────────────────────────
 
-    private static readonly ConcurrentDictionary<Type, PropertyDescriptor[]> Cache = new();
+    /// <summary>
+    /// Pairs the ordered array (for serialiser declaration-order traversal) with the keyed
+    /// dictionary (for deserialiser O(1) lookup) in a single
+    /// <see cref="System.Collections.Concurrent.ConcurrentDictionary{TKey,TValue}"/> entry.
+    /// </summary>
+    private sealed record PropertyDescriptorCache(
+        PropertyDescriptor[] Ordered,
+        Dictionary<string, PropertyDescriptor> ByKey);
+
+    private static readonly ConcurrentDictionary<Type, PropertyDescriptorCache> Cache = new();
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -31,7 +40,15 @@ internal sealed record PropertyDescriptor(
     /// Properties are ordered base-class-first, then by declaration order within each type.
     /// </summary>
     internal static PropertyDescriptor[] GetDescriptors(Type type) =>
-        Cache.GetOrAdd(type, BuildDescriptors);
+        Cache.GetOrAdd(type, BuildDescriptors).Ordered;
+
+    /// <summary>
+    /// Returns the cached dictionary of <see cref="PropertyDescriptor"/> entries for
+    /// <paramref name="type"/>, keyed by <see cref="HumlKey"/> with ordinal comparison.
+    /// Used by the deserialiser for O(1) key lookup.
+    /// </summary>
+    internal static Dictionary<string, PropertyDescriptor> GetLookup(Type type) =>
+        Cache.GetOrAdd(type, BuildDescriptors).ByKey;
 
     /// <summary>
     /// Clears the descriptor cache. Intended for use in test isolation only.
@@ -40,7 +57,7 @@ internal sealed record PropertyDescriptor(
 
     // ── Private implementation ────────────────────────────────────────────────
 
-    private static PropertyDescriptor[] BuildDescriptors(Type type)
+    private static PropertyDescriptorCache BuildDescriptors(Type type)
     {
         // Walk the inheritance chain from root to derived, collecting types in order.
         var typeChain = new List<Type>();
@@ -90,7 +107,15 @@ internal sealed record PropertyDescriptor(
             }
         }
 
-        return result.ToArray();
+        var ordered = result.ToArray();
+
+        // Build the keyed dictionary for O(1) deserialiser lookup.
+        // last-write-wins on duplicate HumlKey — duplicate keys are an application-level misuse.
+        var byKey = new Dictionary<string, PropertyDescriptor>(ordered.Length, StringComparer.Ordinal);
+        foreach (var d in ordered)
+            byKey[d.HumlKey] = d;
+
+        return new PropertyDescriptorCache(ordered, byKey);
     }
 
     /// <summary>
