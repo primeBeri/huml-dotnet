@@ -1,0 +1,59 @@
+name: Bug Report
+description: Report a parsing, serialisation, or deserialisation defect in Huml.Net.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report. Please fill in as much detail
+        as possible to help us reproduce and fix the issue quickly.
+
+  - type: input
+    id: version
+    attributes:
+      label: Huml.Net version
+      description: Run `dotnet list package` in your project to find the version.
+      placeholder: "e.g. 0.1.0-alpha.1"
+    validations:
+      required: true
+
+  - type: input
+    id: tfm
+    attributes:
+      label: Target framework
+      placeholder: "e.g. net10.0, net8.0, netstandard2.1"
+    validations:
+      required: true
+
+  - type: textarea
+    id: input
+    attributes:
+      label: HUML input (if applicable)
+      description: Minimal HUML text that triggers the problem.
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Minimal C# code that demonstrates the issue.
+      render: csharp
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: Include the full exception message and stack trace if applicable.
+    validations:
+      required: true

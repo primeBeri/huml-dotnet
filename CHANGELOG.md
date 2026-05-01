@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-05-01
+## [0.1.0-alpha.1] - 2026-05-01
+
+Initial alpha release.
 
 ### Added
 - **Parser:** Full HUML v0.1 and v0.2 recursive-descent parser validated against the shared `huml-lang/tests` fixture suite.
@@ -18,4 +20,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **CI/NuGet:** GitHub Actions pipeline with SourceLink, MinVer, and OIDC Trusted Publishing.
 
 [Unreleased]: https://github.com/primeBeri/huml-dotnet/compare/v0.1.0-alpha.1...HEAD
-[0.1.0]: https://github.com/primeBeri/huml-dotnet/releases/tag/v0.1.0-alpha.1
+[0.1.0-alpha.1]: https://github.com/primeBeri/huml-dotnet/releases/tag/v0.1.0-alpha.1

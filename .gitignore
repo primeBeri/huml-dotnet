@@ -63,3 +63,40 @@ HumlScratchpad/
 
 # Architecture review reports (local analysis artefacts)
 .Analysis/
+
+# IDE state
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.DotSettings.user
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor backups
+*.bak
+*.orig
+*.swp
+
+# Coverage
+[Cc]overage/
+*.coverage
+*.coveragexml
+
+# Benchmarks
+BenchmarkDotNet.Artifacts/
+
+# Local NuGet cache / packages folder
+packages/
+.nuget/
+
+# Signing keys & certs (never commit)
+*.pfx
+*.snk
+
+# Personal Claude settings
+.claude/settings.local.json

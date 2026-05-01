@@ -1,0 +1,26 @@
+# Support
+
+## Reporting Bugs / Requesting Features
+
+Open an issue on [GitHub Issues](https://github.com/primeBeri/huml-dotnet/issues).
+
+Please include:
+- The version of `Huml.Net` you are using (`dotnet list package`).
+- The target framework (e.g. `net10.0`, `netstandard2.1`).
+- A minimal HUML input that reproduces the problem, or the .NET type you are
+  serialising/deserialising.
+- The actual behaviour and the expected behaviour.
+
+## General Questions
+
+For questions about the HUML language itself (syntax, spec behaviour), please refer to
+the [HUML specification](https://huml.io) or open an issue on the
+[huml-lang/tests](https://github.com/huml-lang/tests) repository.
+
+For questions specific to this .NET implementation, open a GitHub Issue with the
+`question` label.
+
+## Compatibility & Version Support
+
+During the alpha phase (0.x), only the latest published version is maintained. See
+[SECURITY.md](SECURITY.md) for the full support matrix.
