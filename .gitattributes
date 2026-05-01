@@ -1,0 +1,34 @@
+# Default: normalise line endings to LF on commit
+* text=auto eol=lf
+
+# Source & config: force LF
+*.cs        text eol=lf
+*.csproj    text eol=lf
+*.props     text eol=lf
+*.targets   text eol=lf
+*.json      text eol=lf
+*.md        text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.xml       text eol=lf
+*.editorconfig text eol=lf
+*.gitattributes text eol=lf
+*.gitignore text eol=lf
+
+# Visual Studio rewrites .sln files with CRLF; match that expectation
+*.sln       text eol=crlf
+
+# Fixture files: HUML samples are plain text with LF; treat as text
+fixtures/**/*.huml text eol=lf
+# Fixture JSON is text; normalise line endings
+fixtures/**/*.json text eol=lf
+
+# Exclude from `git archive` (GitHub source tarballs)
+.planning/          export-ignore
+.claude/            export-ignore
+.Analysis/          export-ignore
+HumlScratchpad/     export-ignore
+fixtures/extensions/ export-ignore
+tests/              export-ignore
+CLAUDE.md           export-ignore
+BACKLOG.md          export-ignore
