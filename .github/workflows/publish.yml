@@ -21,6 +21,9 @@ jobs:
         with:
           dotnet-version: 10.x
 
+      - name: Restore
+        run: dotnet restore
+
       - name: Pack
         run: dotnet pack --configuration Release --output ./artifacts
 
