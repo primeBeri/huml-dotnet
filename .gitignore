@@ -58,6 +58,10 @@ nunit-*.xml
 !.planning/config.json
 !.planning/PROJECT.md
 
+# Internal planning artefacts at root (local only)
+huml-dotnet-prd.md
+PLAN-documentation.md
+
 #Huml Scratchpad
 HumlScratchpad/
 
