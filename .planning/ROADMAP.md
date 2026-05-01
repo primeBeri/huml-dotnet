@@ -289,9 +289,10 @@ Plans:
   2. `dotnet sourcelink test Huml.Net.*.nupkg` passes, confirming embedded PDB has real commit SHAs and source-stepping works from NuGet
   3. The package manifest contains `PackageId`, `Authors`, `Description`, `PackageLicenseExpression` (MIT), `PackageTags`, `PackageProjectUrl`, `RepositoryUrl`, `PackageReadmeFile`, and `GenerateDocumentationFile` -- confirmed by inspecting the `.nuspec` inside the `.nupkg`
   4. A `0.1.0-alpha.1` pre-release tag triggers the NuGet publish workflow; the package appears on NuGet.org without manual API key entry
-**Plans:** 0/? plans complete
+**Plans:** 0/2 plans complete
 Plans:
-- [ ] To be planned
+- [ ] 08-01-PLAN.md -- Fix publish.yml restore step, CHANGELOG date, local build/test/pack verification, sourcelink test, OIDC setup
+- [ ] 08-02-PLAN.md -- Tag creation, push, workflow monitoring, NuGet.org verification
 
 ## Progress
 
@@ -315,7 +316,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 07.13. Document HumlDocument dual role                         | 1/1 | Complete   | 2026-04-03 |
 | 07.14. O(1) property-lookup dictionary in PropertyDescriptor   | 1/1 | Complete    | 2026-04-03 |
 | 07.15. Cache indent strings in HumlSerializer                  | 1/1 | Complete    | 2026-04-03 |
-| 8. NuGet Release Preparation                                   | 0/?            | Not started | -          |
+| 8. NuGet Release Preparation                                   | 0/2            | Not started | -          |
 
 ## Backlog
 
