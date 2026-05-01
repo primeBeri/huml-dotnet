@@ -1,13 +1,16 @@
 [![CI](https://github.com/primeBeri/huml-dotnet/actions/workflows/ci.yml/badge.svg)](https://github.com/primeBeri/huml-dotnet/actions/workflows/ci.yml)
 [![NuGet](https://img.shields.io/nuget/v/Huml.Net.svg)](https://www.nuget.org/packages/Huml.Net/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 # Huml.Net
 
 A full-featured HUML v0.1/v0.2 parser, serialiser, and deserialiser for .NET with a System.Text.Json-style API and zero runtime dependencies.
 
+> **Pre-1.0 alpha.** API may change before 1.0.0.
+
 ## Installation
 
-```
+```bash
 dotnet add package Huml.Net
 ```
 
@@ -103,6 +106,14 @@ public class ServerConfig
 
 - [HUML Specification](https://huml.io)
 - [Reference Implementation (Go)](https://github.com/huml-lang/go-huml)
+
+## Project
+
+- [Changelog](CHANGELOG.md)
+- [Contributing](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Open issues / backlog](BACKLOG.md)
 
 ## Licence
 
