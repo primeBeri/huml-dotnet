@@ -51,10 +51,12 @@ Full HUML spec compliance (v0.1 + v0.2), validated against the shared `huml-lang
 - [x] `Serialize(object?, Type, HumlOptions?)` uses declared `Type` for property reflection — polymorphic callers get only base-type properties emitted; nested POCOs continue using runtime type (SER-TYPE-01, SER-TYPE-02) — Validated in Phase 07.11: Fix Serialize Object Type Ignores Type Parameter
 - [x] `HumlDocument` XML docs clarify dual role: document root AND nested multiline mapping blocks (via `::` vector indicator); `HumlInlineMapping` XML docs corrected to inline `{k: v}` / empty `{}` scope only; bi-directional `<see cref>` cross-references added — Validated in Phase 07.13: Document HumlDocument Dual Role
 - [x] `PropertyDescriptorCache` record bundles `Ordered: PropertyDescriptor[]` + `ByKey: Dictionary<string, PropertyDescriptor>` built in a single pass; `DeserializeMappingEntries` uses O(1) `TryGetValue` instead of O(n) `foreach` linear scan — Validated in Phase 07.14: Add Property Lookup Dictionary to PropertyDescriptor Cache
+- [x] `IndentCache` static `string[]` (65 entries, depth 0–64) replaces per-call `new string(' ', depth*2)` allocation; `Indent()` falls back to dynamic only beyond depth 64 — Validated in Phase 07.15: Cache Indent Strings in HumlSerializer
+- [x] `<DebugType>embedded</DebugType>` added to `Huml.Net.csproj`; `sourcelink test` passes for all four TFMs (net8.0, net9.0, net10.0, netstandard2.1); `CHANGELOG.md` dated 2026-05-01; `publish.yml` restore step fixed; `Huml.Net 0.1.0-alpha.1` published to NuGet.org via OIDC Trusted Publishing — Validated in Phase 08: NuGet Release Preparation
 
 ### Active
 
-- [ ] CI pipeline: GitHub Actions running both fixture suite versions
+- [x] CI pipeline: GitHub Actions running both fixture suite versions — CI green after HumlScratchpad removed from Huml.Net.sln (2026-05-01)
 
 ### Out of Scope
 

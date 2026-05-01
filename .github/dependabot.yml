@@ -12,8 +12,7 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
 
-  - package-ecosystem: gitsubmodule
-    directory: "/"
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 3
+  # gitsubmodule intentionally omitted — fixtures/v0.1 and fixtures/v0.2 are
+  # pinned to specific upstream spec-version tags and must be updated manually.
+  # Dependabot cannot distinguish the two version-pinned submodules from the
+  # same huml-lang/tests repo and would propose semantically incorrect bumps.
