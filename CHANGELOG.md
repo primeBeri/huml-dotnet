@@ -16,3 +16,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Attributes:** `[HumlProperty]` (key rename, `OmitIfDefault`, per-property `InlineMode`) and `[HumlIgnore]`.
 - **Public API:** `System.Text.Json`-style static `Huml` facade with `Serialize`, `Deserialize`, and `Parse` overloads.
 - **CI/NuGet:** GitHub Actions pipeline with SourceLink, MinVer, and OIDC Trusted Publishing.
+
+[Unreleased]: https://github.com/primeBeri/huml-dotnet/compare/v0.1.0-alpha.1...HEAD
+[0.1.0]: https://github.com/primeBeri/huml-dotnet/releases/tag/v0.1.0-alpha.1
