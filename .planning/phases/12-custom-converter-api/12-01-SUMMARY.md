@@ -204,3 +204,16 @@ Each task was committed atomically:
 ---
 *Phase: 12-custom-converter-api*
 *Completed: 2026-05-03*
+
+## Self-Check: PASSED
+
+- FOUND: src/Huml.Net/Serialization/HumlConverter.cs
+- FOUND: src/Huml.Net/Serialization/HumlConverterT.cs
+- FOUND: src/Huml.Net/Serialization/HumlSerializerContext.cs
+- FOUND: src/Huml.Net/Serialization/Attributes/HumlConverterAttribute.cs
+- FOUND: src/Huml.Net/Serialization/ConverterCache.cs
+- FOUND: tests/Huml.Net.Tests/Serialization/HumlConverterTests.cs
+- FOUND commit: 350b950
+- FOUND commit: a0e7370
+- Build: 0 warnings, 0 errors across netstandard2.1/net8.0/net9.0/net10.0
+- Tests: 823 passed, 22 skipped, 0 failed
