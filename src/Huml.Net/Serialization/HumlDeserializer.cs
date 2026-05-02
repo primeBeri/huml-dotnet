@@ -59,6 +59,16 @@ internal static class HumlDeserializer
     /// </summary>
     private static object? DeserializeNode(HumlNode node, Type targetType, HumlOptions options)
     {
+        // Converter dispatch — type-level [HumlConverter] and HumlOptions.Converters.
+        // Property-level converters are dispatched in DeserializeMappingEntries (desc.Converter).
+        var typeConverter = ConverterCache.TryGet(targetType, options);
+        if (typeConverter != null)
+        {
+            var result = typeConverter.ReadObject(node);
+            ThrowIfNullForNonNullable(result, targetType, key: string.Empty, line: GetNodeLine(node));
+            return result;
+        }
+
         if (node is HumlScalar scalar)
             return CoerceScalar(scalar, targetType, key: string.Empty, line: scalar.Line, options);
 
@@ -129,12 +139,38 @@ internal static class HumlDeserializer
             if (descriptor.Property.SetMethod is null)
                 continue;
 
-            // Deserialize the value recursively targeting the property type.
-            // When the value is a scalar, call CoerceScalar directly so the mapping key
-            // is included in any diagnostic exception (WR-01 fix).
-            var deserializedValue = mapping.Value is HumlScalar s
-                ? CoerceScalar(s, descriptor.Property.PropertyType, mapping.Key, s.Line, options)
-                : DeserializeNode(mapping.Value, descriptor.Property.PropertyType, options);
+            // Deserialize the value, with converter-first priority.
+            object? deserializedValue;
+            if (descriptor.Converter != null)
+            {
+                // Property-level [HumlConverter] — highest priority, overrides type-level and options
+                deserializedValue = descriptor.Converter.ReadObject(mapping.Value);
+                ThrowIfNullForNonNullable(
+                    deserializedValue,
+                    descriptor.Property.PropertyType,
+                    mapping.Key,
+                    GetNodeLine(mapping.Value));
+            }
+            else if (ConverterCache.TryGet(descriptor.Property.PropertyType, options) is { } propConverter)
+            {
+                // Type-level or options-level converter for this property's type
+                deserializedValue = propConverter.ReadObject(mapping.Value);
+                ThrowIfNullForNonNullable(
+                    deserializedValue,
+                    descriptor.Property.PropertyType,
+                    mapping.Key,
+                    GetNodeLine(mapping.Value));
+            }
+            else if (mapping.Value is HumlScalar s)
+            {
+                // Direct scalar coercion — includes key in diagnostic exception (WR-01 fix preserved)
+                deserializedValue = CoerceScalar(s, descriptor.Property.PropertyType, mapping.Key, s.Line, options);
+            }
+            else
+            {
+                // Complex node — route through DeserializeNode (picks up type-level + options converters)
+                deserializedValue = DeserializeNode(mapping.Value, descriptor.Property.PropertyType, options);
+            }
 
             // Set property value via reflection
             descriptor.Property.SetValue(instance, deserializedValue);
@@ -359,6 +395,21 @@ internal static class HumlDeserializer
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Throws <see cref="HumlDeserializeException"/> if <paramref name="value"/> is null but
+    /// <paramref name="targetType"/> is a non-nullable value type.
+    /// </summary>
+    private static void ThrowIfNullForNonNullable(object? value, Type targetType, string key, int line)
+    {
+        if (value is null && targetType.IsValueType && Nullable.GetUnderlyingType(targetType) == null)
+            throw new HumlDeserializeException(
+                $"Converter returned null for non-nullable value type '{targetType.Name}'.",
+                key, line);
+    }
+
+    /// <summary>Returns the source line from a HumlNode. All nodes inherit Line from HumlNode.</summary>
+    private static int GetNodeLine(HumlNode node) => node.Line;
 
     /// <summary>
     /// Returns <c>true</c> if <paramref name="type"/> is <c>Dictionary&lt;string, T&gt;</c>
