@@ -24,8 +24,9 @@ internal static class HumlDeserializer
     /// <exception cref="HumlDeserializeException">On any mapping, coercion, or constructor failure.</exception>
     internal static T Deserialize<T>(string huml, HumlOptions? options = null)
     {
-        var doc = new HumlParser(huml, options ?? HumlOptions.Default).Parse();
-        return (T)DeserializeNode(doc, typeof(T))!;
+        var opts = options ?? HumlOptions.Default;
+        var doc = new HumlParser(huml, opts).Parse();
+        return (T)DeserializeNode(doc, typeof(T), opts)!;
     }
 
     /// <summary>
@@ -35,8 +36,9 @@ internal static class HumlDeserializer
     /// </summary>
     internal static T Deserialize<T>(ReadOnlySpan<char> huml, HumlOptions? options = null)
     {
-        var doc = new HumlParser(huml.ToString(), options ?? HumlOptions.Default).Parse();
-        return (T)DeserializeNode(doc, typeof(T))!;
+        var opts = options ?? HumlOptions.Default;
+        var doc = new HumlParser(huml.ToString(), opts).Parse();
+        return (T)DeserializeNode(doc, typeof(T), opts)!;
     }
 
     /// <summary>
@@ -45,8 +47,9 @@ internal static class HumlDeserializer
     /// </summary>
     internal static object? Deserialize(string huml, Type targetType, HumlOptions? options = null)
     {
-        var doc = new HumlParser(huml, options ?? HumlOptions.Default).Parse();
-        return DeserializeNode(doc, targetType);
+        var opts = options ?? HumlOptions.Default;
+        var doc = new HumlParser(huml, opts).Parse();
+        return DeserializeNode(doc, targetType, opts);
     }
 
     // ── Core dispatch ─────────────────────────────────────────────────────────
@@ -54,19 +57,19 @@ internal static class HumlDeserializer
     /// <summary>
     /// Dispatches an AST node to the appropriate deserialisation handler based on node type.
     /// </summary>
-    private static object? DeserializeNode(HumlNode node, Type targetType)
+    private static object? DeserializeNode(HumlNode node, Type targetType, HumlOptions options)
     {
         if (node is HumlScalar scalar)
             return CoerceScalar(scalar, targetType, key: string.Empty, line: scalar.Line);
 
         if (node is HumlDocument doc)
-            return DeserializeMappingEntries(doc.Entries, targetType);
+            return DeserializeMappingEntries(doc.Entries, targetType, options);
 
         if (node is HumlInlineMapping inlineMapping)
-            return DeserializeMappingEntries(inlineMapping.Entries, targetType);
+            return DeserializeMappingEntries(inlineMapping.Entries, targetType, options);
 
         if (node is HumlSequence seq)
-            return DeserializeSequence(seq, targetType);
+            return DeserializeSequence(seq, targetType, options);
 
         throw new HumlDeserializeException("Unexpected AST node type encountered during deserialization.");
     }
@@ -79,11 +82,11 @@ internal static class HumlDeserializer
     /// settable properties. Shared by <see cref="HumlDocument"/> and <see cref="HumlInlineMapping"/>
     /// dispatch paths.
     /// </summary>
-    private static object? DeserializeMappingEntries(IReadOnlyList<HumlNode> entries, Type targetType)
+    private static object? DeserializeMappingEntries(IReadOnlyList<HumlNode> entries, Type targetType, HumlOptions options)
     {
         // Dispatch to dictionary path if targetType is Dictionary<string, T>
         if (IsStringKeyedDictionary(targetType))
-            return DeserializeDictionary(entries, targetType);
+            return DeserializeDictionary(entries, targetType, options);
 
         // Create instance via parameterless constructor
         object instance;
@@ -100,7 +103,7 @@ internal static class HumlDeserializer
         }
 
         // Get property lookup dictionary for the target type (O(1) key access)
-        var lookup = PropertyDescriptor.GetLookup(targetType);
+        var lookup = PropertyDescriptor.GetLookup(targetType, options.PropertyNamingPolicy);
 
         // Map each HUML mapping entry to a property
         foreach (var entry in entries)
@@ -131,7 +134,7 @@ internal static class HumlDeserializer
             // is included in any diagnostic exception (WR-01 fix).
             var deserializedValue = mapping.Value is HumlScalar s
                 ? CoerceScalar(s, descriptor.Property.PropertyType, mapping.Key, s.Line)
-                : DeserializeNode(mapping.Value, descriptor.Property.PropertyType);
+                : DeserializeNode(mapping.Value, descriptor.Property.PropertyType, options);
 
             // Set property value via reflection
             descriptor.Property.SetValue(instance, deserializedValue);
@@ -146,7 +149,7 @@ internal static class HumlDeserializer
     /// Deserialises a <see cref="HumlSequence"/> into an array, <see cref="List{T}"/>,
     /// or <see cref="IEnumerable{T}"/> based on <paramref name="targetType"/>.
     /// </summary>
-    private static object DeserializeSequence(HumlSequence seq, Type targetType)
+    private static object DeserializeSequence(HumlSequence seq, Type targetType, HumlOptions options)
     {
         // a. Array dispatch
         if (targetType.IsArray)
@@ -155,7 +158,7 @@ internal static class HumlDeserializer
             var array = Array.CreateInstance(elementType, seq.Items.Count);
             for (int i = 0; i < seq.Items.Count; i++)
             {
-                var item = DeserializeNode(seq.Items[i], elementType);
+                var item = DeserializeNode(seq.Items[i], elementType, options);
                 array.SetValue(item, i);
             }
             return array;
@@ -167,7 +170,7 @@ internal static class HumlDeserializer
             var elementType = targetType.GetGenericArguments()[0];
             var list = (IList)Activator.CreateInstance(targetType)!;
             foreach (var item in seq.Items)
-                list.Add(DeserializeNode(item, elementType));
+                list.Add(DeserializeNode(item, elementType, options));
             return list;
         }
 
@@ -197,7 +200,7 @@ internal static class HumlDeserializer
                 var listType = typeof(List<>).MakeGenericType(elementType);
                 var list = (IList)Activator.CreateInstance(listType)!;
                 foreach (var item in seq.Items)
-                    list.Add(DeserializeNode(item, elementType));
+                    list.Add(DeserializeNode(item, elementType, options));
                 return list;
             }
         }
@@ -213,7 +216,7 @@ internal static class HumlDeserializer
     /// Accepts <see cref="IReadOnlyList{HumlNode}"/> so it can be called from both
     /// <see cref="HumlDocument"/> and <see cref="HumlInlineMapping"/> dispatch paths.
     /// </summary>
-    private static object DeserializeDictionary(IReadOnlyList<HumlNode> entries, Type targetType)
+    private static object DeserializeDictionary(IReadOnlyList<HumlNode> entries, Type targetType, HumlOptions options)
     {
         var valueType = targetType.GetGenericArguments()[1];
         var dict = (IDictionary)Activator.CreateInstance(targetType)!;
@@ -223,7 +226,7 @@ internal static class HumlDeserializer
             if (entry is not HumlMapping mapping)
                 continue;
 
-            var value = DeserializeNode(mapping.Value, valueType);
+            var value = DeserializeNode(mapping.Value, valueType, options);
             dict[mapping.Key] = value;
         }
 
