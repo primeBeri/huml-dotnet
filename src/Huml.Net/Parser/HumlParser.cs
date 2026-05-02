@@ -138,14 +138,14 @@ internal sealed class HumlParser
 
             case RootType.MultilineList:
             {
-                var seq = ParseMultilineList(0, tk.Line);
+                var seq = ParseMultilineList(0, tk.Line, tk.Column);
                 AssertRootEnd();
                 return new HumlDocument(new HumlNode[] { seq }) { Line = tk.Line, Column = tk.Column };
             }
 
             case RootType.MultilineDict:
             {
-                var doc = ParseMultilineDict(0, tk.Line);
+                var doc = ParseMultilineDict(0, tk.Line, tk.Column);
                 AssertRootEnd();
                 return doc;
             }
@@ -397,7 +397,7 @@ internal sealed class HumlParser
             else if (indicator.Type == TokenType.VectorIndicator)
             {
                 var vectorIndicator = Advance(); // consume '::'
-                var value = ParseVector(indent + 2, vectorIndicator.Line);
+                var value = ParseVector(indent + 2, vectorIndicator.Line, vectorIndicator.Column);
                 entries.Add(new HumlMapping(key, value) { Line = keyToken.Line, Column = keyToken.Column });
             }
             else
@@ -417,7 +417,8 @@ internal sealed class HumlParser
     /// </summary>
     /// <param name="indent">The expected indentation of child entries.</param>
     /// <param name="indicatorLine">The 1-based source line of the <c>::</c> or first-entry token that opened this block.</param>
-    private HumlDocument ParseMultilineDict(int indent, int indicatorLine)
+    /// <param name="indicatorColumn">The 0-based column of the <c>::</c> or first-entry token that opened this block.</param>
+    private HumlDocument ParseMultilineDict(int indent, int indicatorLine, int indicatorColumn)
     {
         if (++_depth > _maxDepth)
             throw new HumlParseException(
@@ -426,7 +427,7 @@ internal sealed class HumlParser
         try
         {
             var entries = ParseMappingEntries(indent);
-            return new HumlDocument(entries.ToArray()) { Line = indicatorLine, Column = 0 };
+            return new HumlDocument(entries.ToArray()) { Line = indicatorLine, Column = indicatorColumn };
         }
         finally
         {
@@ -441,7 +442,8 @@ internal sealed class HumlParser
     /// </summary>
     /// <param name="indent">The expected indentation of list item tokens.</param>
     /// <param name="indicatorLine">The 1-based source line of the <c>::</c> or first list-item token that opened this list.</param>
-    private HumlSequence ParseMultilineList(int indent, int indicatorLine)
+    /// <param name="indicatorColumn">The 0-based column of the <c>::</c> or first list-item token that opened this list.</param>
+    private HumlSequence ParseMultilineList(int indent, int indicatorLine, int indicatorColumn)
     {
         if (++_depth > _maxDepth)
             throw new HumlParseException(
@@ -473,7 +475,7 @@ internal sealed class HumlParser
                 {
                     // List item with nested vector: - ::
                     var listVectorIndicator = Advance(); // consume '::'
-                    var nested = ParseVector(indent + 2, listVectorIndicator.Line);
+                    var nested = ParseVector(indent + 2, listVectorIndicator.Line, listVectorIndicator.Column);
                     items.Add(nested);
                 }
                 else if (IsValueToken(valueTk.Type))
@@ -498,7 +500,7 @@ internal sealed class HumlParser
                 }
             }
 
-            return new HumlSequence(items.ToArray()) { Line = indicatorLine, Column = 0 };
+            return new HumlSequence(items.ToArray()) { Line = indicatorLine, Column = indicatorColumn };
         }
         finally
         {
@@ -512,7 +514,8 @@ internal sealed class HumlParser
     /// </summary>
     /// <param name="childIndent">Expected indentation of child tokens for multiline content.</param>
     /// <param name="indicatorLine">The 1-based line number of the consumed <c>::</c> token.</param>
-    private HumlNode ParseVector(int childIndent, int indicatorLine)
+    /// <param name="indicatorColumn">The 0-based column of the consumed <c>::</c> token.</param>
+    private HumlNode ParseVector(int childIndent, int indicatorLine, int indicatorColumn)
     {
         if (++_depth > _maxDepth)
             throw new HumlParseException(
@@ -532,8 +535,8 @@ internal sealed class HumlParser
                         next.Line, next.Column);
 
                 return next.Type == TokenType.ListItem
-                    ? (HumlNode)ParseMultilineList(childIndent, indicatorLine)
-                    : ParseMultilineDict(childIndent, indicatorLine);
+                    ? (HumlNode)ParseMultilineList(childIndent, indicatorLine, indicatorColumn)
+                    : ParseMultilineDict(childIndent, indicatorLine, indicatorColumn);
             }
 
             // Inline
