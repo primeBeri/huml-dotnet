@@ -66,8 +66,26 @@ public class HumlConverterTests
         public Point Location { get; set; }
     }
 
+    // Converter that serialises TaggedPoint as "X,Y" string scalar — for type-level converter tests
+    // (PointConverter handles Point; TaggedPointConverter handles TaggedPoint — separate types)
+    private sealed class TaggedPointConverter : HumlConverter<TaggedPoint>
+    {
+        public override bool CanConvert(Type t) => t == typeof(TaggedPoint);
+
+        public override TaggedPoint Read(HumlNode node)
+        {
+            if (node is not HumlScalar { Kind: ScalarKind.String, Value: string s })
+                throw new HumlDeserializeException("Expected string for TaggedPoint.");
+            var parts = s.Split(',');
+            return new TaggedPoint(int.Parse(parts[0]), int.Parse(parts[1]));
+        }
+
+        public override void Write(HumlSerializerContext context, TaggedPoint value)
+            => context.AppendRaw($"\"{value.X},{value.Y}\"");
+    }
+
     // Type-level [HumlConverter] — for CONV-REG-03, CONV-SER-05, CONV-DES-04
-    [HumlConverter(typeof(PointConverter))]
+    [HumlConverter(typeof(TaggedPointConverter))]
     [StructLayout(LayoutKind.Auto)]
     private record struct TaggedPoint(int X, int Y);
 
@@ -95,7 +113,7 @@ public class HumlConverterTests
 
     // ── CONV-REG-* — Registration ─────────────────────────────────────────────
 
-    [Fact(Skip = "RED — CONV-REG-01: implement in plan 12-02/03")]
+    [Fact]
     public void EmptyConverters_DoesNotAffectDefaultSerialisation()
     {
         // Arrange: options with explicit empty list
@@ -106,7 +124,7 @@ public class HumlConverterTests
         act.Should().NotThrow();
     }
 
-    [Fact(Skip = "RED — CONV-REG-02: implement in plan 12-01 (PropertyDescriptor) + 12-02/03 wiring")]
+    [Fact]
     public void PropertyLevel_HumlConverterAttribute_CachedInPropertyDescriptor()
     {
         // Arrange + Act: build descriptors for PointPropPoco
@@ -117,7 +135,7 @@ public class HumlConverterTests
         locationDesc!.Converter.Should().BeOfType<PointConverter>();
     }
 
-    [Fact(Skip = "RED — CONV-REG-03: implement in plan 12-02/03")]
+    [Fact]
     public void TypeLevel_HumlConverterAttribute_UsedWhenTypeAppearsAsTarget()
     {
         var options = new HumlOptions();
@@ -127,7 +145,7 @@ public class HumlConverterTests
         act.Should().NotThrow();
     }
 
-    [Fact(Skip = "RED — CONV-REG-04: implement in plan 12-02/03")]
+    [Fact]
     public void Priority_PropertyLevel_WinsOverTypeLevel()
     {
         // A type with type-level converter; property with different converter
@@ -137,7 +155,7 @@ public class HumlConverterTests
         act.Should().NotThrow();
     }
 
-    [Fact(Skip = "RED — CONV-REG-05: implement in plan 12-01 (PropertyDescriptor)")]
+    [Fact]
     public void HumlConverterAttribute_WithNonHumlConverterType_ThrowsInvalidOperationException()
     {
         // Act: building descriptors for BadConverterPoco should throw
@@ -147,7 +165,7 @@ public class HumlConverterTests
 
     // ── CONV-SER-* — Serialiser ───────────────────────────────────────────────
 
-    [Fact(Skip = "RED — CONV-SER-01: implement in plan 12-02")]
+    [Fact]
     public void OptionsLevel_Converter_InvokedBeforeBuiltinDispatch()
     {
         var options = new HumlOptions { Converters = new List<HumlConverter> { new PointConverter() } };
@@ -155,7 +173,7 @@ public class HumlConverterTests
         result.Should().Contain("\"1,2\"");
     }
 
-    [Fact(Skip = "RED — CONV-SER-02: implement in plan 12-02")]
+    [Fact]
     public void AppendSerializedValue_UsesBuiltinDispatch()
     {
         // A converter that calls context.AppendSerializedValue(string) internally
@@ -166,7 +184,7 @@ public class HumlConverterTests
         result.Should().Contain("\"hello\"");
     }
 
-    [Fact(Skip = "RED — CONV-SER-03: implement in plan 12-02")]
+    [Fact]
     public void AppendRaw_EmitsVerbatimFragment()
     {
         var options = new HumlOptions { Converters = new List<HumlConverter> { new PointConverter() } };
@@ -175,7 +193,7 @@ public class HumlConverterTests
         result.Should().Contain("\"7,8\"");
     }
 
-    [Fact(Skip = "RED — CONV-SER-04: implement in plan 12-02")]
+    [Fact]
     public void PropertyLevel_Converter_Write_InvokedForThatPropertyOnly()
     {
         var poco = new PointPropPoco { Location = new Point(10, 20), Name = "world" };
@@ -185,7 +203,7 @@ public class HumlConverterTests
         result.Should().Contain("\"world\"");
     }
 
-    [Fact(Skip = "RED — CONV-SER-05: implement in plan 12-02")]
+    [Fact]
     public void TypeLevel_Converter_Write_InvokedForEveryOccurrence()
     {
         // A POCO holding two TaggedPoint properties
@@ -297,7 +315,7 @@ public class HumlConverterTests
 
     // ── CONV-ERR-* — Error Cases ──────────────────────────────────────────────
 
-    [Fact(Skip = "RED — CONV-ERR-01: implement in plan 12-01 (PropertyDescriptor) validation")]
+    [Fact]
     public void ConverterWithNoParameterlessCtor_ThrowsInvalidOperationException()
     {
         // Building descriptors for BadConverterPoco (which has NoCtor_Converter)
@@ -306,7 +324,7 @@ public class HumlConverterTests
            .WithMessage("*NoCtor_Converter*parameterless constructor*");
     }
 
-    [Fact(Skip = "RED — CONV-ERR-02: implement in plan 12-02/03")]
+    [Fact]
     public void Converter_CanConvertFalse_NeverInvoked()
     {
         // NeverMatchConverter.CanConvert returns false — it must not appear in output
@@ -319,7 +337,7 @@ public class HumlConverterTests
         result.Should().Contain("\"hello\"");
     }
 
-    [Fact(Skip = "RED — CONV-ERR-03: implement in plan 12-02/03")]
+    [Fact]
     public void FirstMatchWins_InConvertersList()
     {
         // Register two converters for Point — first-registered must win
