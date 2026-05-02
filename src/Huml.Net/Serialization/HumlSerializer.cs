@@ -134,6 +134,19 @@ internal static class HumlSerializer
             return;
         }
 
+        // Enum — emit as quoted string (member name or [HumlEnumValue] override, with optional policy transform)
+        {
+            var valueType = value.GetType();
+            if (valueType.IsEnum)
+            {
+                var enumName = EnumNameCache.GetName(valueType, value, options.PropertyNamingPolicy);
+                sb.Append('"');
+                AppendEscapedString(sb, enumName);
+                sb.Append('"');
+                return;
+            }
+        }
+
         // IDictionary<string, *> — must precede IEnumerable
         if (value is IDictionary dict)
         {
@@ -399,6 +412,7 @@ internal static class HumlSerializer
         if (value is bool) return true;
         if (IsIntegerType(value)) return true;
         if (value is double or float or decimal) return true;
+        if (value.GetType().IsEnum) return true;
 
         // Anything else (collections, POCOs) is complex
         return false;
