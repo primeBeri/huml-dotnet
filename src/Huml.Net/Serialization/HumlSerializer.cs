@@ -493,6 +493,14 @@ internal static class HumlSerializer
         }
     }
 
+    /// <summary>
+    /// Internal hook called by <see cref="HumlSerializerContext.AppendSerializedValue"/>.
+    /// Plan 12-02 will replace this stub with the real dispatch that checks converter priority.
+    /// For now it delegates directly to <see cref="SerializeValue"/>.
+    /// </summary>
+    internal static void SerializeValueInternal(System.Text.StringBuilder sb, object? value, int depth, HumlOptions options)
+        => SerializeValue(sb, value, depth, options);
+
     private static string VersionString(HumlSpecVersion version) =>
 #pragma warning disable CS0618 // V0_1 is deprecated but we must still handle it
         version == HumlSpecVersion.V0_1 ? "v0.1.0" : "v0.2.0";

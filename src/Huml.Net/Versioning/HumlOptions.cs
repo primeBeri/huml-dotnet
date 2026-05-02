@@ -67,6 +67,19 @@ public sealed class HumlOptions
     /// </remarks>
     public HumlNamingPolicy? PropertyNamingPolicy { get; init; }
 
+    /// <summary>
+    /// A list of <see cref="Serialization.HumlConverter"/> instances consulted during serialisation and
+    /// deserialisation when no property-level or type-level <see cref="Serialization.HumlConverterAttribute"/>
+    /// is present. The first converter whose <see cref="Serialization.HumlConverter.CanConvert"/> returns
+    /// <c>true</c> for a given type is used.
+    /// </summary>
+    /// <remarks>
+    /// Do not modify this list after passing the <see cref="HumlOptions"/> instance to any
+    /// <c>Huml.*</c> method — results are non-deterministic if the list is mutated during or
+    /// after a serialise/deserialise call.
+    /// </remarks>
+    public IList<Serialization.HumlConverter> Converters { get; init; } = new List<Serialization.HumlConverter>();
+
     private int _maxRecursionDepth = 64;
 
     /// <summary>
