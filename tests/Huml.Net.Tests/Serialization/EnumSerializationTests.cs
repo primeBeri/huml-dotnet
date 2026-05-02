@@ -77,14 +77,14 @@ public class EnumSerializationTests
         result.Should().Contain("\"high-priority\"");
     }
 
-    // ── ENUM-SER-05: Undefined numeric enum value falls back to integer string ─
+    // ── ENUM-SER-05: Undefined numeric enum value throws HumlSerializeException ─
 
     [Fact]
-    public void Serialize_UndefinedNumericEnumValue_FallsBackToIntegerString()
+    public void Serialize_UndefinedNumericEnumValue_ThrowsHumlSerializeException()
     {
         var poco = new StatusPoco { State = (Status)99 };
-        var result = Huml.Serialize(poco, HumlOptions.LatestSupported);
-        result.Should().Contain("\"99\"");
+        var act = () => Huml.Serialize(poco, HumlOptions.LatestSupported);
+        act.Should().Throw<HumlSerializeException>();
     }
 
     // ── ENUM-SER-06: [Flags] combination throws HumlSerializeException ────────
@@ -95,6 +95,18 @@ public class EnumSerializationTests
         var poco = new PermissionsPoco { Access = Permissions.Read | Permissions.Write };
         var act = () => Huml.Serialize(poco, HumlOptions.LatestSupported);
         act.Should().Throw<HumlSerializeException>();
+    }
+
+    // ── ENUM-SER-07: Single named [Flags] member serialises without throwing ────
+
+    [Fact]
+    public void Serialize_SingleNamedFlagsEnumMember_EmitsNameWithoutThrowing()
+    {
+        var poco = new PermissionsPoco { Access = Permissions.Read };
+        var act = () => Huml.Serialize(poco, HumlOptions.LatestSupported);
+        act.Should().NotThrow();
+        var result = Huml.Serialize(poco, HumlOptions.LatestSupported);
+        result.Should().Contain("\"Read\"");
     }
 
     // ── ENUM-DES-01: Deserialize exact member name → correct enum value ───────
@@ -201,6 +213,20 @@ public class EnumSerializationTests
         var result = Huml.Deserialize<StatusPoco>(huml, options);
         // "active" matches Status.Active after KebabCase policy converts "Active" → "active"
         result.State.Should().Be(Status.Active);
+    }
+
+    // ── ENUM-DES-09: Out-of-range integer scalar returns undefined enum value ────
+
+    [Fact]
+    public void Deserialize_OutOfRangeIntegerScalar_ReturnsUndefinedEnumValue()
+    {
+        const string huml = """
+            %HUML v0.2.0
+            State: 99
+            """;
+        var result = Huml.Deserialize<StatusPoco>(huml, HumlOptions.LatestSupported);
+        // Enum.ToObject silently returns an undefined value; this documents the contract.
+        result.State.Should().Be((Status)99);
     }
 
     // ── ENUM-RT-01: Round-trip preserves value equality (no policy) ───────────
