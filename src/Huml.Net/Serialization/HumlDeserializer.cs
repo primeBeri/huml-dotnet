@@ -151,6 +151,16 @@ internal static class HumlDeserializer
                     mapping.Key,
                     GetNodeLine(mapping.Value));
             }
+            else if (ConverterCache.TryGet(descriptor.Property.PropertyType, options) is { } propConverter)
+            {
+                // Type-level or options-level converter for this property's type
+                deserializedValue = propConverter.ReadObject(mapping.Value);
+                ThrowIfNullForNonNullable(
+                    deserializedValue,
+                    descriptor.Property.PropertyType,
+                    mapping.Key,
+                    GetNodeLine(mapping.Value));
+            }
             else if (mapping.Value is HumlScalar s)
             {
                 // Direct scalar coercion — includes key in diagnostic exception (WR-01 fix preserved)

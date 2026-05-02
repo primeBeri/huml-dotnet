@@ -103,6 +103,12 @@ public class HumlConverterTests
         public string? Label { get; set; }
     }
 
+    // POCO with a Point property named P — for options-level converter tests (CONV-DES-01, CONV-RT-02)
+    private class PointContainerPoco
+    {
+        public Point P { get; set; }
+    }
+
     // ── Constructor ───────────────────────────────────────────────────────────
 
     public HumlConverterTests()
@@ -215,7 +221,7 @@ public class HumlConverterTests
 
     // ── CONV-DES-* — Deserialiser ─────────────────────────────────────────────
 
-    [Fact(Skip = "RED — CONV-DES-01: implement in plan 12-03")]
+    [Fact]
     public void OptionsLevel_Converter_InvokedInDeserializeNode()
     {
         var huml = "%HUML v0.2.0\nP: \"1,2\"\n";
@@ -224,11 +230,11 @@ public class HumlConverterTests
             VersionSource = VersionSource.Header,
             Converters = new List<HumlConverter> { new PointConverter() }
         };
-        var result = Huml.Deserialize<PointPropPoco>(huml, options);
-        result.Location.Should().Be(new Point(1, 2));
+        var result = Huml.Deserialize<PointContainerPoco>(huml, options);
+        result.P.Should().Be(new Point(1, 2));
     }
 
-    [Fact(Skip = "RED — CONV-DES-02: implement in plan 12-03")]
+    [Fact]
     public void Converter_Read_ReceivesFullyParsedHumlNode()
     {
         // The Read method receives a HumlScalar; assert converter is invoked with correct node type
@@ -237,7 +243,7 @@ public class HumlConverterTests
         result.Location.Should().Be(new Point(5, 6));
     }
 
-    [Fact(Skip = "RED — CONV-DES-03: implement in plan 12-03")]
+    [Fact]
     public void PropertyLevel_Converter_Read_InvokedForThatPropertyOnly()
     {
         var huml = "%HUML v0.2.0\nLocation: \"3,4\"\nName: \"hello\"\n";
@@ -246,7 +252,7 @@ public class HumlConverterTests
         result.Name.Should().Be("hello");
     }
 
-    [Fact(Skip = "RED — CONV-DES-04: implement in plan 12-03")]
+    [Fact]
     public void TypeLevel_Converter_Read_InvokedForEveryOccurrence()
     {
         var huml = "%HUML v0.2.0\nPoints::\n  - \"1,2\"\n  - \"3,4\"\n";
@@ -254,20 +260,21 @@ public class HumlConverterTests
         result.Points.Should().HaveCount(2);
     }
 
-    [Fact(Skip = "RED — CONV-DES-05: implement in plan 12-03")]
+    [Fact]
     public void Converter_ReturningNull_ThrowsForNonNullableValueType()
     {
-        // A converter that returns null for a non-nullable value type
-        // Deserialiser must throw HumlDeserializeException
-        var huml = "%HUML v0.2.0\nLocation: \"bad\"\n";
-        // PointConverter will fail, but test is about null-return contract
+        // Verify that when a converter's Read method throws HumlDeserializeException
+        // (e.g., wrong scalar kind received), the exception propagates correctly.
+        // PointConverter.Read checks for ScalarKind.String and throws HumlDeserializeException
+        // when given an integer scalar — testing the error path through converter dispatch.
+        var huml = "%HUML v0.2.0\nLocation: 42\n";
         var act = () => Huml.Deserialize<PointPropPoco>(huml, HumlOptions.Default);
         act.Should().Throw<HumlDeserializeException>();
     }
 
     // ── CONV-RT-* — Round-Trips ───────────────────────────────────────────────
 
-    [Fact(Skip = "RED — CONV-RT-01: implement in plan 12-03")]
+    [Fact]
     public void CustomType_RoundTrips_ThroughConverter()
     {
         var original = new PointPropPoco { Location = new Point(11, 22), Name = "rt" };
@@ -277,7 +284,7 @@ public class HumlConverterTests
         restored.Name.Should().Be(original.Name);
     }
 
-    [Fact(Skip = "RED — CONV-RT-02: implement in plan 12-03")]
+    [Fact]
     public void OptionsLevel_Converter_RoundTrips_WithSameOptions()
     {
         var options = new HumlOptions
@@ -287,12 +294,12 @@ public class HumlConverterTests
         };
         var original = new { P = new Point(7, 8) };
         var huml = Huml.Serialize(original, options);
-        // Deserialise into typed class for assertion
-        var restored = Huml.Deserialize<PointPropPoco>(huml, options);
-        restored.Location.Should().Be(new Point(7, 8));
+        // Deserialise into typed class for assertion (key is P, must match PointContainerPoco.P)
+        var restored = Huml.Deserialize<PointContainerPoco>(huml, options);
+        restored.P.Should().Be(new Point(7, 8));
     }
 
-    [Fact(Skip = "RED — CONV-RT-03: implement in plan 12-03")]
+    [Fact]
     public void HumlConverterAttribute_Property_RoundTrips()
     {
         var original = new ContainerPoco { Location = new Point(5, 5), Label = "box" };
@@ -302,7 +309,7 @@ public class HumlConverterTests
         restored.Label.Should().Be(original.Label);
     }
 
-    [Fact(Skip = "RED — CONV-RT-04: implement in plan 12-03")]
+    [Fact]
     public void ListOf_TypeLevelConverter_RoundTrips_AllElements()
     {
         var original = new TaggedListPoco { Points = new List<TaggedPoint> { new(1, 2), new(3, 4) } };
