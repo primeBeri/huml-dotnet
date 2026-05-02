@@ -60,7 +60,7 @@ internal static class HumlDeserializer
     private static object? DeserializeNode(HumlNode node, Type targetType, HumlOptions options)
     {
         if (node is HumlScalar scalar)
-            return CoerceScalar(scalar, targetType, key: string.Empty, line: scalar.Line);
+            return CoerceScalar(scalar, targetType, key: string.Empty, line: scalar.Line, options);
 
         if (node is HumlDocument doc)
             return DeserializeMappingEntries(doc.Entries, targetType, options);
@@ -133,7 +133,7 @@ internal static class HumlDeserializer
             // When the value is a scalar, call CoerceScalar directly so the mapping key
             // is included in any diagnostic exception (WR-01 fix).
             var deserializedValue = mapping.Value is HumlScalar s
-                ? CoerceScalar(s, descriptor.Property.PropertyType, mapping.Key, s.Line)
+                ? CoerceScalar(s, descriptor.Property.PropertyType, mapping.Key, s.Line, options)
                 : DeserializeNode(mapping.Value, descriptor.Property.PropertyType, options);
 
             // Set property value via reflection
@@ -240,7 +240,7 @@ internal static class HumlDeserializer
     /// Handles null, bool, string, integer, float, NaN, and Inf kinds with diagnostic
     /// exceptions carrying <paramref name="key"/> and <paramref name="line"/> on failure.
     /// </summary>
-    private static object? CoerceScalar(HumlScalar scalar, Type targetType, string key, int line)
+    private static object? CoerceScalar(HumlScalar scalar, Type targetType, string key, int line, HumlOptions options)
     {
         // Unwrap Nullable<T> to its underlying type for comparison
         var underlying = Nullable.GetUnderlyingType(targetType) ?? targetType;
@@ -248,6 +248,34 @@ internal static class HumlDeserializer
 
         try
         {
+            if (underlying.IsEnum)
+            {
+                if (scalar.Kind == ScalarKind.Null)
+                {
+                    if (isNullable)
+                        return null;
+                    throw new HumlDeserializeException(
+                        $"Cannot assign null to non-nullable enum type '{underlying.Name}'.",
+                        key, line);
+                }
+                if (scalar.Kind == ScalarKind.String)
+                {
+                    var raw = scalar.Value as string ?? string.Empty;
+                    if (EnumNameCache.TryParse(underlying, raw, options.PropertyNamingPolicy, out var enumResult))
+                        return enumResult;
+                    throw new HumlDeserializeException(
+                        $"Value \"{raw}\" is not a valid member of enum '{underlying.Name}'.",
+                        key, line);
+                }
+                if (scalar.Kind == ScalarKind.Integer)
+                {
+                    return Enum.ToObject(underlying, Convert.ToInt64(scalar.Value, CultureInfo.InvariantCulture));
+                }
+                throw new HumlDeserializeException(
+                    $"Cannot convert {scalar.Kind} to enum '{underlying.Name}'.",
+                    key, line);
+            }
+
             switch (scalar.Kind)
             {
                 case ScalarKind.Null:
