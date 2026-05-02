@@ -99,47 +99,53 @@ internal sealed class HumlParser
             {
                 var scalar = TokenToScalar(Advance());
                 AssertRootEnd();
-                return new HumlDocument(new HumlNode[] { scalar });
+                return new HumlDocument(new HumlNode[] { scalar }) { Line = tk.Line, Column = tk.Column };
             }
 
             case RootType.EmptyList:
             {
-                Advance(); // consume EmptyList token
+                var emptyToken = Advance(); // consume EmptyList token
                 AssertRootEnd();
-                return new HumlDocument(new HumlNode[] { new HumlSequence(Array.Empty<HumlNode>()) });
+                return new HumlDocument(new HumlNode[]
+                {
+                    new HumlSequence(Array.Empty<HumlNode>()) { Line = emptyToken.Line, Column = emptyToken.Column }
+                }) { Line = emptyToken.Line, Column = emptyToken.Column };
             }
 
             case RootType.EmptyDict:
             {
-                Advance(); // consume EmptyDict token
+                var emptyToken = Advance(); // consume EmptyDict token
                 AssertRootEnd();
-                return new HumlDocument(new HumlNode[] { new HumlInlineMapping(Array.Empty<HumlNode>()) });
+                return new HumlDocument(new HumlNode[]
+                {
+                    new HumlInlineMapping(Array.Empty<HumlNode>()) { Line = emptyToken.Line, Column = emptyToken.Column }
+                }) { Line = emptyToken.Line, Column = emptyToken.Column };
             }
 
             case RootType.InlineList:
             {
                 var seq = ParseInlineList();
                 AssertRootEnd();
-                return new HumlDocument(new HumlNode[] { seq });
+                return new HumlDocument(new HumlNode[] { seq }) { Line = tk.Line, Column = tk.Column };
             }
 
             case RootType.InlineDict:
             {
                 var inlineMapping = ParseInlineDict();
                 AssertRootEnd();
-                return new HumlDocument(inlineMapping.Entries); // root inline dict entries become top-level entries
+                return new HumlDocument(inlineMapping.Entries) { Line = tk.Line, Column = tk.Column }; // root inline dict entries become top-level entries
             }
 
             case RootType.MultilineList:
             {
-                var seq = ParseMultilineList(0);
+                var seq = ParseMultilineList(0, tk.Line);
                 AssertRootEnd();
-                return new HumlDocument(new HumlNode[] { seq });
+                return new HumlDocument(new HumlNode[] { seq }) { Line = tk.Line, Column = tk.Column };
             }
 
             case RootType.MultilineDict:
             {
-                var doc = ParseMultilineDict(0);
+                var doc = ParseMultilineDict(0, tk.Line);
                 AssertRootEnd();
                 return doc;
             }
@@ -254,14 +260,21 @@ internal sealed class HumlParser
     /// <summary>Converts a scalar token to a typed <see cref="HumlScalar"/> node.</summary>
     private static HumlScalar TokenToScalar(Token tok) => tok.Type switch
     {
-        TokenType.String  => new HumlScalar(ScalarKind.String,  tok.Value),
-        TokenType.Int     => new HumlScalar(ScalarKind.Integer, ParseInt(tok.Value!)),
-        TokenType.Float   => new HumlScalar(ScalarKind.Float,   ParseFloat(tok.Value!)),
+        TokenType.String  => new HumlScalar(ScalarKind.String,  tok.Value)
+                                { Line = tok.Line, Column = tok.Column },
+        TokenType.Int     => new HumlScalar(ScalarKind.Integer, ParseInt(tok.Value!))
+                                { Line = tok.Line, Column = tok.Column },
+        TokenType.Float   => new HumlScalar(ScalarKind.Float,   ParseFloat(tok.Value!))
+                                { Line = tok.Line, Column = tok.Column },
         TokenType.Bool    => new HumlScalar(ScalarKind.Bool,    string.Equals(tok.Value, "true",
-                                 StringComparison.OrdinalIgnoreCase)),
-        TokenType.Null    => new HumlScalar(ScalarKind.Null,    null),
-        TokenType.NaN     => new HumlScalar(ScalarKind.NaN,     tok.Value),
-        TokenType.Inf     => new HumlScalar(ScalarKind.Inf,     tok.Value),
+                                 StringComparison.OrdinalIgnoreCase))
+                                { Line = tok.Line, Column = tok.Column },
+        TokenType.Null    => new HumlScalar(ScalarKind.Null,    null)
+                                { Line = tok.Line, Column = tok.Column },
+        TokenType.NaN     => new HumlScalar(ScalarKind.NaN,     tok.Value)
+                                { Line = tok.Line, Column = tok.Column },
+        TokenType.Inf     => new HumlScalar(ScalarKind.Inf,     tok.Value)
+                                { Line = tok.Line, Column = tok.Column },
         _                 => throw new HumlParseException(
                                  $"Unexpected token '{tok.Type}' where scalar expected.",
                                  tok.Line, tok.Column),
@@ -359,7 +372,7 @@ internal sealed class HumlParser
                         valueToken.Line, valueToken.Column);
                 int entryLine = keyToken.Line;
                 var scalar = TokenToScalar(Advance());
-                entries.Add(new HumlMapping(key, scalar));
+                entries.Add(new HumlMapping(key, scalar) { Line = keyToken.Line, Column = keyToken.Column });
 
                 // Support root inline dict notation: key: val1, key2: val2, ...
                 // When a comma follows, enter inline mode and record the line number.
@@ -385,7 +398,7 @@ internal sealed class HumlParser
             {
                 var vectorIndicator = Advance(); // consume '::'
                 var value = ParseVector(indent + 2, vectorIndicator.Line);
-                entries.Add(new HumlMapping(key, value));
+                entries.Add(new HumlMapping(key, value) { Line = keyToken.Line, Column = keyToken.Column });
             }
             else
             {
@@ -402,7 +415,9 @@ internal sealed class HumlParser
     /// Parses a multiline dict block at the given <paramref name="indent"/> level.
     /// Returns a <see cref="HumlDocument"/> whose entries are the parsed mappings.
     /// </summary>
-    private HumlDocument ParseMultilineDict(int indent)
+    /// <param name="indent">The expected indentation of child entries.</param>
+    /// <param name="indicatorLine">The 1-based source line of the <c>::</c> or first-entry token that opened this block.</param>
+    private HumlDocument ParseMultilineDict(int indent, int indicatorLine)
     {
         if (++_depth > _maxDepth)
             throw new HumlParseException(
@@ -411,7 +426,7 @@ internal sealed class HumlParser
         try
         {
             var entries = ParseMappingEntries(indent);
-            return new HumlDocument(entries.ToArray());
+            return new HumlDocument(entries.ToArray()) { Line = indicatorLine, Column = 0 };
         }
         finally
         {
@@ -424,7 +439,9 @@ internal sealed class HumlParser
     /// Each item is introduced by a <see cref="TokenType.ListItem"/> (<c>-</c>) token.
     /// Returns a <see cref="HumlSequence"/>.
     /// </summary>
-    private HumlSequence ParseMultilineList(int indent)
+    /// <param name="indent">The expected indentation of list item tokens.</param>
+    /// <param name="indicatorLine">The 1-based source line of the <c>::</c> or first list-item token that opened this list.</param>
+    private HumlSequence ParseMultilineList(int indent, int indicatorLine)
     {
         if (++_depth > _maxDepth)
             throw new HumlParseException(
@@ -465,13 +482,13 @@ internal sealed class HumlParser
                 }
                 else if (valueTk.Type == TokenType.EmptyList)
                 {
-                    Advance();
-                    items.Add(new HumlSequence(Array.Empty<HumlNode>()));
+                    var emptyTok = Advance();
+                    items.Add(new HumlSequence(Array.Empty<HumlNode>()) { Line = emptyTok.Line, Column = emptyTok.Column });
                 }
                 else if (valueTk.Type == TokenType.EmptyDict)
                 {
-                    Advance();
-                    items.Add(new HumlInlineMapping(Array.Empty<HumlNode>()));
+                    var emptyTok = Advance();
+                    items.Add(new HumlInlineMapping(Array.Empty<HumlNode>()) { Line = emptyTok.Line, Column = emptyTok.Column });
                 }
                 else
                 {
@@ -481,7 +498,7 @@ internal sealed class HumlParser
                 }
             }
 
-            return new HumlSequence(items.ToArray());
+            return new HumlSequence(items.ToArray()) { Line = indicatorLine, Column = 0 };
         }
         finally
         {
@@ -515,8 +532,8 @@ internal sealed class HumlParser
                         next.Line, next.Column);
 
                 return next.Type == TokenType.ListItem
-                    ? (HumlNode)ParseMultilineList(childIndent)
-                    : ParseMultilineDict(childIndent);
+                    ? (HumlNode)ParseMultilineList(childIndent, indicatorLine)
+                    : ParseMultilineDict(childIndent, indicatorLine);
             }
 
             // Inline
@@ -550,14 +567,14 @@ internal sealed class HumlParser
 
         if (tk.Type == TokenType.EmptyList)
         {
-            Advance();
-            return new HumlSequence(Array.Empty<HumlNode>());
+            var emptyTok = Advance();
+            return new HumlSequence(Array.Empty<HumlNode>()) { Line = emptyTok.Line, Column = emptyTok.Column };
         }
 
         if (tk.Type == TokenType.EmptyDict)
         {
-            Advance();
-            return new HumlInlineMapping(Array.Empty<HumlNode>());
+            var emptyTok = Advance();
+            return new HumlInlineMapping(Array.Empty<HumlNode>()) { Line = emptyTok.Line, Column = emptyTok.Column };
         }
 
         if (tk.Type == TokenType.Key || tk.Type == TokenType.QuotedKey)
@@ -577,6 +594,8 @@ internal sealed class HumlParser
     /// </summary>
     private HumlSequence ParseInlineList()
     {
+        int firstItemLine = Peek().Line;
+        int firstItemColumn = Peek().Column;
         var items = new List<HumlNode>();
 
         while (true)
@@ -593,7 +612,7 @@ internal sealed class HumlParser
                 break;
         }
 
-        return new HumlSequence(items.ToArray());
+        return new HumlSequence(items.ToArray()) { Line = firstItemLine, Column = firstItemColumn };
     }
 
     /// <summary>
@@ -606,6 +625,9 @@ internal sealed class HumlParser
         var entries = new List<HumlMapping>();
         var seenKeys = new HashSet<string>(StringComparer.Ordinal);
 
+        int firstKeyLine = 0;
+        int firstKeyColumn = 0;
+
         while (true)
         {
             var tk = Peek();
@@ -614,6 +636,12 @@ internal sealed class HumlParser
 
             var keyToken = Advance();
             string key = keyToken.Value!;
+
+            if (firstKeyLine == 0)
+            {
+                firstKeyLine = keyToken.Line;
+                firstKeyColumn = keyToken.Column;
+            }
 
             if (!seenKeys.Add(key))
                 throw new HumlParseException(
@@ -634,7 +662,7 @@ internal sealed class HumlParser
                     $"Expected scalar value in inline dict, got '{valueTk.Type}'.",
                     valueTk.Line, valueTk.Column);
 
-            entries.Add(new HumlMapping(key, TokenToScalar(Advance())));
+            entries.Add(new HumlMapping(key, TokenToScalar(Advance())) { Line = keyToken.Line, Column = keyToken.Column });
 
             if (Peek().Type == TokenType.Comma)
                 Advance(); // consume comma
@@ -642,7 +670,7 @@ internal sealed class HumlParser
                 break;
         }
 
-        return new HumlInlineMapping(entries.ToArray());
+        return new HumlInlineMapping(entries.ToArray()) { Line = firstKeyLine, Column = firstKeyColumn };
     }
 
     // ── End-of-document assertion ─────────────────────────────────────────────

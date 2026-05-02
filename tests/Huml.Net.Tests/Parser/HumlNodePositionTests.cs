@@ -180,7 +180,7 @@ public class HumlNodePositionTests
     [Fact]
     public void Parse_InlineDictMapping_HumlMappingHasKeyTokenPosition()
     {
-        var doc = new HumlParser("items:: { a: 1, b: 2 }", HumlOptions.Default).Parse();
+        var doc = new HumlParser("items:: a: 1, b: 2", HumlOptions.Default).Parse();
 
         doc.Entries.Should().HaveCount(1);
         var outer = doc.Entries[0] as HumlMapping;
@@ -278,7 +278,7 @@ public class HumlNodePositionTests
     [Fact]
     public void Parse_InlineDict_HumlInlineMappingHasFirstKeyLine()
     {
-        var doc = new HumlParser("obj:: { a: 1 }", HumlOptions.Default).Parse();
+        var doc = new HumlParser("obj:: a: 1", HumlOptions.Default).Parse();
 
         doc.Entries.Should().HaveCount(1);
         var mapping = doc.Entries[0] as HumlMapping;
