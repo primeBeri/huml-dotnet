@@ -53,6 +53,8 @@ Full HUML spec compliance (v0.1 + v0.2), validated against the shared `huml-lang
 - [x] `PropertyDescriptorCache` record bundles `Ordered: PropertyDescriptor[]` + `ByKey: Dictionary<string, PropertyDescriptor>` built in a single pass; `DeserializeMappingEntries` uses O(1) `TryGetValue` instead of O(n) `foreach` linear scan — Validated in Phase 07.14: Add Property Lookup Dictionary to PropertyDescriptor Cache
 - [x] `IndentCache` static `string[]` (65 entries, depth 0–64) replaces per-call `new string(' ', depth*2)` allocation; `Indent()` falls back to dynamic only beyond depth 64 — Validated in Phase 07.15: Cache Indent Strings in HumlSerializer
 - [x] `<DebugType>embedded</DebugType>` added to `Huml.Net.csproj`; `sourcelink test` passes for all four TFMs (net8.0, net9.0, net10.0, netstandard2.1); `CHANGELOG.md` dated 2026-05-01; `publish.yml` restore step fixed; `Huml.Net 0.1.0-alpha.1` published to NuGet.org via OIDC Trusted Publishing — Validated in Phase 08: NuGet Release Preparation
+- [x] `HumlNode` body-declared `int Line { get; init; }` and `int Column { get; init; }` propagated from `Token` through every `HumlParser` construction site; `HumlDeserializer` uses real AST node positions instead of hardcoded `line: 0`; `HumlDeserializeException.Line` reflects actual source line — Validated in Phase 09: Source Positions in AST Nodes (POS-01..POS-09)
+- [x] `HumlNamingPolicy` abstract class with `KebabCase`, `SnakeCase`, `CamelCase`, `PascalCase` singletons; `HumlOptions.PropertyNamingPolicy` (default `null`); `PropertyDescriptor` cache keyed on `(Type, HumlNamingPolicy?)`; policy applied symmetrically in `HumlSerializer.SerializeMappingBody` and all `HumlDeserializer` recursive paths; `Equals`/`GetHashCode` on `HumlNamingPolicy` prevents unbounded cache growth for custom subclasses — Validated in Phase 10: Property Naming Policy (NP-01..NP-13)
 
 ### Active
 
@@ -84,15 +86,15 @@ Full HUML spec compliance (v0.1 + v0.2), validated against the shared `huml-lang
 
 ## Key Decisions
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| Multi-target `netstandard2.1;net8.0;net9.0;net10.0` | `Span` in public API requires ns2.1+; multi-targeting lets modern consumers get optimised TFM builds via NuGet resolution | — Pending |
-| Drop .NET Framework support | `netstandard2.1` compat floor is required for `ReadOnlySpan<char>` overload; .NET Framework was netstandard2.0 territory only | — Pending |
-| Single parser code path with version gates | No forked `Lexer`/`Parser` classes per spec version — explicit `>=` branch points make divergence searchable and direction of change self-documenting | — Pending |
-| Properties emitted in declaration order | .NET convention; alphabetical sorting (go-huml) would surprise C# consumers | — Pending |
-| `Huml.Net.Linting` is a separate package | Parser has zero opinions on style/advisories; linting logic must never accrete into core | — Pending |
-| v0.1 + v0.2 both in v1 scope | Support window is last 3 minor versions; v0.1 remains supported until v0.3 ships | — Pending |
-| `SpecVersionPolicy` constants as code | `HumlUnsupportedVersionException` references them directly — error message stays accurate without manual updates | — Pending |
+| Decision                                            | Rationale                                                                                                                                             | Outcome   |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Multi-target `netstandard2.1;net8.0;net9.0;net10.0` | `Span` in public API requires ns2.1+; multi-targeting lets modern consumers get optimised TFM builds via NuGet resolution                             | — Pending |
+| Drop .NET Framework support                         | `netstandard2.1` compat floor is required for `ReadOnlySpan<char>` overload; .NET Framework was netstandard2.0 territory only                         | — Pending |
+| Single parser code path with version gates          | No forked `Lexer`/`Parser` classes per spec version — explicit `>=` branch points make divergence searchable and direction of change self-documenting | — Pending |
+| Properties emitted in declaration order             | .NET convention; alphabetical sorting (go-huml) would surprise C# consumers                                                                           | — Pending |
+| `Huml.Net.Linting` is a separate package            | Parser has zero opinions on style/advisories; linting logic must never accrete into core                                                              | — Pending |
+| v0.1 + v0.2 both in v1 scope                        | Support window is last 3 minor versions; v0.1 remains supported until v0.3 ships                                                                      | — Pending |
+| `SpecVersionPolicy` constants as code               | `HumlUnsupportedVersionException` references them directly — error message stays accurate without manual updates                                      | — Pending |
 
 ---
 *Last updated: 2026-04-03 — Phase 07.14 complete: `PropertyDescriptorCache` introduces O(1) dictionary lookup in `DeserializeMappingEntries`, replacing O(n) linear scan. 718 tests green across net8.0/net9.0/net10.0.*
