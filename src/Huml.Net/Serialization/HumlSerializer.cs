@@ -169,7 +169,7 @@ internal static class HumlSerializer
     /// </summary>
     private static void SerializeMappingBody(StringBuilder sb, object obj, int depth, HumlOptions options, Type? declaredType = null)
     {
-        var descriptors = PropertyDescriptor.GetDescriptors(declaredType ?? obj.GetType());
+        var descriptors = PropertyDescriptor.GetDescriptors(declaredType ?? obj.GetType(), options.PropertyNamingPolicy);
         var indent = Indent(depth);
 
         foreach (var desc in descriptors)
