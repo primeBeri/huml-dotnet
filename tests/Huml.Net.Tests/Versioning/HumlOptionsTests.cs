@@ -1,4 +1,5 @@
 using AwesomeAssertions;
+using Huml.Net.Serialization;
 using Huml.Net.Versioning;
 using Xunit;
 
@@ -141,5 +142,27 @@ public class HumlOptionsTests
     {
         var act = () => new HumlOptions { MaxRecursionDepth = 65536 };
         act.Should().Throw<ArgumentOutOfRangeException>();
+    }
+
+    // ── PropertyNamingPolicy tests (NP-06) ────────────────────────────────────
+
+    [Fact]
+    public void PropertyNamingPolicy_default_is_null()
+    {
+        var options = new HumlOptions();
+        options.PropertyNamingPolicy.Should().BeNull();
+    }
+
+    [Fact]
+    public void Default_PropertyNamingPolicy_is_null()
+    {
+        HumlOptions.Default.PropertyNamingPolicy.Should().BeNull();
+    }
+
+    [Fact]
+    public void PropertyNamingPolicy_can_be_set_to_KebabCase()
+    {
+        var options = new HumlOptions { PropertyNamingPolicy = HumlNamingPolicy.KebabCase };
+        options.PropertyNamingPolicy.Should().BeSameAs(HumlNamingPolicy.KebabCase);
     }
 }
