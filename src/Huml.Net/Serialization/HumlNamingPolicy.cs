@@ -41,6 +41,18 @@ public abstract class HumlNamingPolicy
     /// <returns>The converted HUML key name.</returns>
     public abstract string ConvertName(string name);
 
+    /// <inheritdoc/>
+    /// <remarks>Two <see cref="HumlNamingPolicy"/> instances of the same concrete type are
+    /// considered equal. This ensures that custom stateless policy subclasses stored as separate
+    /// instances still share a single <see cref="PropertyDescriptor"/> cache entry rather than
+    /// producing unbounded cache growth. Override in a derived class if instance identity is
+    /// required.</remarks>
+    public override bool Equals(object? obj) =>
+        obj is HumlNamingPolicy other && GetType() == other.GetType();
+
+    /// <inheritdoc/>
+    public override int GetHashCode() => GetType().GetHashCode();
+
     // ── Private implementations ───────────────────────────────────────────────
 
     private sealed class KebabCasePolicy : HumlNamingPolicy
