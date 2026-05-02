@@ -18,7 +18,8 @@ internal sealed record PropertyDescriptor(
     bool OmitIfDefault,
     bool IsInitOnly,
     object? DefaultValue,
-    bool? Inline)
+    bool? Inline,
+    HumlConverter? Converter)   // property-level [HumlConverter] resolved at cache-build time
 {
     // ── Cache ─────────────────────────────────────────────────────────────────
 
@@ -105,7 +106,27 @@ internal sealed record PropertyDescriptor(
                     ? (prop.PropertyType.IsValueType ? Activator.CreateInstance(prop.PropertyType) : null)
                     : null;
 
-                result.Add(new PropertyDescriptor(humlKey, prop, omitIfDefault, isInitOnly, defaultValue, inline));
+                // Resolve property-level [HumlConverter] attribute
+                var converterAttr = prop.GetCustomAttribute<HumlConverterAttribute>();
+                HumlConverter? converter = null;
+                if (converterAttr != null)
+                {
+                    try
+                    {
+                        converter = (HumlConverter)Activator.CreateInstance(converterAttr.ConverterType)!;
+                    }
+                    catch (MissingMethodException)
+                    {
+                        throw new InvalidOperationException(
+                            $"Converter type '{converterAttr.ConverterType.Name}' has no accessible " +
+                            "parameterless constructor.");
+                    }
+                    if (converter is not HumlConverter)
+                        throw new InvalidOperationException(
+                            $"Converter type '{converterAttr.ConverterType.Name}' does not derive from HumlConverter.");
+                }
+
+                result.Add(new PropertyDescriptor(humlKey, prop, omitIfDefault, isInitOnly, defaultValue, inline, converter));
             }
         }
 
