@@ -628,7 +628,10 @@ internal sealed class HumlParser
         var entries = new List<HumlMapping>();
         var seenKeys = new HashSet<string>(StringComparer.Ordinal);
 
-        int firstKeyLine = 0;
+        // Use nullable to distinguish "first key not yet seen" from the position sentinel 0
+        // ("unknown position"). Using 0 as a sentinel conflates the two meanings and would
+        // silently produce Line = 0 if the loop exits without consuming any key (WR-03 fix).
+        int? firstKeyLine = null;
         int firstKeyColumn = 0;
 
         while (true)
@@ -640,7 +643,7 @@ internal sealed class HumlParser
             var keyToken = Advance();
             string key = keyToken.Value!;
 
-            if (firstKeyLine == 0)
+            if (firstKeyLine is null)
             {
                 firstKeyLine = keyToken.Line;
                 firstKeyColumn = keyToken.Column;
@@ -673,7 +676,7 @@ internal sealed class HumlParser
                 break;
         }
 
-        return new HumlInlineMapping(entries.ToArray()) { Line = firstKeyLine, Column = firstKeyColumn };
+        return new HumlInlineMapping(entries.ToArray()) { Line = firstKeyLine ?? 0, Column = firstKeyColumn };
     }
 
     // ── End-of-document assertion ─────────────────────────────────────────────

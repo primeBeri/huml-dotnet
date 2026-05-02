@@ -212,7 +212,8 @@ public class HumlNodePositionTests
         var seq = mapping!.Value as HumlSequence;
         seq.Should().NotBeNull();
         seq!.Line.Should().Be(1);
-        seq.Column.Should().Be(0);
+        // The :: token in "items::" is at column 5 (0-based); WR-02 fix propagates this.
+        seq.Column.Should().Be(5);
     }
 
     [Fact]
