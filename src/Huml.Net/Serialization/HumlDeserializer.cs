@@ -57,7 +57,7 @@ internal static class HumlDeserializer
     private static object? DeserializeNode(HumlNode node, Type targetType)
     {
         if (node is HumlScalar scalar)
-            return CoerceScalar(scalar, targetType, key: string.Empty, line: 0);
+            return CoerceScalar(scalar, targetType, key: string.Empty, line: scalar.Line);
 
         if (node is HumlDocument doc)
             return DeserializeMappingEntries(doc.Entries, targetType);
@@ -120,7 +120,7 @@ internal static class HumlDeserializer
                 throw new HumlDeserializeException(
                     $"Property '{descriptor.Property.Name}' on type '{targetType.Name}' is init-only and cannot be deserialized.",
                     mapping.Key,
-                    line: 0);
+                    line: mapping.Line);
 
             // Read-only (no setter) — skip silently
             if (descriptor.Property.SetMethod is null)
