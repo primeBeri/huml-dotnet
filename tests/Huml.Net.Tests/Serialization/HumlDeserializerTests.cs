@@ -155,6 +155,35 @@ public class HumlDeserializerTests
             .WithMessage("*Name*");
     }
 
+    [Fact]
+    public void Deserialize_InitOnlyProperty_ExceptionCarriesRealLineNumber()
+    {
+        const string huml = """
+            Name: "test"
+            """;
+
+        var act = () => HumlDeserializer.Deserialize<InitOnlyPoco>(huml);
+
+        var ex = act.Should().Throw<HumlDeserializeException>().Which;
+        ex.Line.Should().Be(1);
+        ex.Key.Should().Be("Name");
+    }
+
+    [Fact]
+    public void Deserialize_InitOnlyPropertyOnLineThree_ExceptionCarriesLine3()
+    {
+        const string huml = """
+            # leading comment
+            # second comment
+            Name: "test"
+            """;
+
+        var act = () => HumlDeserializer.Deserialize<InitOnlyPoco>(huml);
+
+        var ex = act.Should().Throw<HumlDeserializeException>().Which;
+        ex.Line.Should().Be(3);
+    }
+
     // ── Collections ───────────────────────────────────────────────────────────
 
     [Fact]
@@ -335,6 +364,44 @@ public class HumlDeserializerTests
         var act = () => HumlDeserializer.Deserialize<SimplePoco>(huml);
 
         act.Should().Throw<HumlDeserializeException>();
+    }
+
+    [Fact]
+    public void Deserialize_TypeCoercionFailure_ExceptionCarriesRealLineNumber()
+    {
+        const string huml = "Count: \"not-a-number\"";
+
+        var act = () => HumlDeserializer.Deserialize<SimplePoco>(huml);
+
+        var ex = act.Should().Throw<HumlDeserializeException>().Which;
+        ex.Line.Should().Be(1);
+    }
+
+    [Fact]
+    public void Deserialize_TypeCoercionFailureOnSecondLine_ExceptionCarriesLine2()
+    {
+        const string huml = """
+            Name: "Alice"
+            Count: "not-a-number"
+            """;
+
+        var act = () => HumlDeserializer.Deserialize<SimplePoco>(huml);
+
+        var ex = act.Should().Throw<HumlDeserializeException>().Which;
+        ex.Line.Should().Be(2);
+    }
+
+    [Fact]
+    public void Deserialize_RootScalarTypeCoercionFailure_ExceptionCarriesLine1()
+    {
+        // NaN cannot be coerced to int — exercises the scalar branch in DeserializeNode
+        // (called from DeserializeMappingEntries when mapping.Value is a HumlScalar)
+        const string huml = "Count: nan";
+
+        var act = () => HumlDeserializer.Deserialize<SimplePoco>(huml);
+
+        var ex = act.Should().Throw<HumlDeserializeException>().Which;
+        ex.Line.Should().Be(1);
     }
 
     // ── Untyped overload ──────────────────────────────────────────────────────
