@@ -29,3 +29,11 @@ accepted items that are tracked for implementation across the project.
 | Testing       | Add concurrency test for `PropertyDescriptor` cache under parallel deserialisation (section 9, task 4.3)                        | V2      | Low      | Planned |
 | Documentation | Add CHANGELOG.md with version history from git tags (section 8.2)                                                               | V1      | Low      | Done    |
 | Security      | Document uncapped document size limitation; consider optional `MaxDocumentSize` option (section 6.1)                            | V2      | Low      | Planned |
+| API           | Add `HumlOptions.PropertyNamingPolicy` and built-in `HumlNamingPolicy.KebabCase`/`SnakeCase`/`CamelCase`/`PascalCase` policies for automatic key↔property name mapping (Phase 999.18) | V2 | High   | Planned |
+| API           | Add enum deserialisation support — `Enum.TryParse` with case-insensitive fallback plus optional `[HumlEnumValue]` per-member name override (Phase 999.19) | V2 | High   | Planned |
+| API           | Add enum serialisation support — emit member name (or `[HumlEnumValue]`) honouring naming policy; enables round-trip for enum-valued properties (Phase 999.20) | V2 | High   | Planned |
+| API           | Add custom converter API: `HumlConverter<T>` abstract base, `[HumlConverter]` attribute, `HumlOptions.Converters` collection (Phase 999.21) | V2 | High   | Planned |
+| API           | Add `Huml.Populate<T>(string, T existing, options?)` for config-overlay deserialisation into an existing object instance (Phase 999.22) | V2 | Medium | Planned |
+| API           | Add `HumlOptions.DefaultIgnoreCondition` / `[HumlIgnoreDefaults]` for type-level default-omit without per-property `OmitIfDefault` (Phase 999.23) | V2 | Low    | Planned |
+| API           | Add `HumlOptions.ValidateDuplicateKeysOnWrite` to catch dictionary key collisions during serialisation (Phase 999.24) | V2 | Low    | Planned |
+| API           | Add `IReadOnlySet<T>` deserialisation support to collection dispatch (Phase 999.25) | V2 | Low    | Planned |
