@@ -126,8 +126,12 @@ internal static class HumlDeserializer
             if (descriptor.Property.SetMethod is null)
                 continue;
 
-            // Deserialize the value recursively targeting the property type
-            var deserializedValue = DeserializeNode(mapping.Value, descriptor.Property.PropertyType);
+            // Deserialize the value recursively targeting the property type.
+            // When the value is a scalar, call CoerceScalar directly so the mapping key
+            // is included in any diagnostic exception (WR-01 fix).
+            var deserializedValue = mapping.Value is HumlScalar s
+                ? CoerceScalar(s, descriptor.Property.PropertyType, mapping.Key, s.Line)
+                : DeserializeNode(mapping.Value, descriptor.Property.PropertyType);
 
             // Set property value via reflection
             descriptor.Property.SetValue(instance, deserializedValue);
