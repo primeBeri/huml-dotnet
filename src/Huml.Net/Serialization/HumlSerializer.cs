@@ -12,6 +12,11 @@ namespace Huml.Net.Serialization;
 /// </summary>
 internal static class HumlSerializer
 {
+    // ── Re-entry guard ────────────────────────────────────────────────────────
+
+    [ThreadStatic]
+    private static HashSet<Type>? _activeConverterTypes;
+
     // ── Public entry points ───────────────────────────────────────────────────
 
     /// <summary>
@@ -70,10 +75,40 @@ internal static class HumlSerializer
     // ── Core serialization logic ──────────────────────────────────────────────
 
     private static void SerializeValue(StringBuilder sb, object? value, int depth, HumlOptions options, Type? declaredType = null)
+        => SerializeValueInternal(sb, value, depth, options, declaredType);
+
+    /// <summary>
+    /// Core serialization dispatch. Called by <see cref="SerializeValue"/> and by
+    /// <see cref="HumlSerializerContext.AppendSerializedValue"/>.
+    /// </summary>
+    internal static void SerializeValueInternal(StringBuilder sb, object? value, int depth, HumlOptions options, Type? declaredType = null)
     {
         if (value is null)
         {
             sb.Append("null");
+            return;
+        }
+
+        // Converter dispatch — must precede all built-in dispatch.
+        // Property-level converters are dispatched by EmitEntry; this path handles
+        // type-level [HumlConverter] and HumlOptions.Converters.
+        if (ConverterCache.TryGet(value.GetType(), options) is { } converter)
+        {
+            var valueType = value.GetType();
+            _activeConverterTypes ??= new HashSet<Type>();
+            if (!_activeConverterTypes.Add(valueType))
+                throw new InvalidOperationException(
+                    $"Converter re-entry detected for type '{valueType.Name}'. " +
+                    "A converter must not call AppendSerializedValue with the same type it handles.");
+            try
+            {
+                var ctx = new HumlSerializerContext(sb, depth, options);
+                converter.WriteObject(ctx, value);
+            }
+            finally
+            {
+                _activeConverterTypes.Remove(valueType);
+            }
             return;
         }
 
@@ -193,7 +228,7 @@ internal static class HumlSerializer
             if (desc.OmitIfDefault && Equals(propValue, desc.DefaultValue))
                 continue;
 
-            EmitEntry(sb, indent, desc.HumlKey, propValue, depth, options, desc.Inline);
+            EmitEntry(sb, indent, desc.HumlKey, propValue, depth, options, desc.Inline, desc.Converter);
         }
     }
 
@@ -202,6 +237,8 @@ internal static class HumlSerializer
     /// Scalars use <c>key: value\n</c>; complex values use <c>key::\n</c> then body.
     /// When <paramref name="inlineOverride"/> is non-null it takes precedence over
     /// <see cref="HumlOptions.CollectionFormat"/> for collection properties.
+    /// When <paramref name="converterOverride"/> is non-null it is invoked at highest priority
+    /// (property-level converter wins over type-level and options-level).
     /// </summary>
     private static void EmitEntry(
         StringBuilder sb,
@@ -210,9 +247,37 @@ internal static class HumlSerializer
         object? value,
         int depth,
         HumlOptions options,
-        bool? inlineOverride = null)
+        bool? inlineOverride = null,
+        HumlConverter? converterOverride = null)
     {
-        if (IsScalarValue(value))
+        // Property-level converter dispatch (highest priority — wins over type-level and options)
+        if (converterOverride != null)
+        {
+            var valueType = value?.GetType();
+            _activeConverterTypes ??= new HashSet<Type>();
+            bool added = valueType != null && _activeConverterTypes.Add(valueType);
+            if (valueType != null && !added)
+                throw new InvalidOperationException(
+                    $"Converter re-entry detected for type '{valueType.Name}'. " +
+                    "A converter must not call AppendSerializedValue with the same type it handles.");
+            try
+            {
+                sb.Append(indent);
+                AppendKey(sb, key);
+                sb.Append(": ");
+                var ctx = new HumlSerializerContext(sb, depth + 1, options);
+                converterOverride.WriteObject(ctx, value);
+                sb.Append('\n');
+            }
+            finally
+            {
+                if (valueType != null && added)
+                    _activeConverterTypes.Remove(valueType);
+            }
+            return;
+        }
+
+        if (IsScalarValue(value, options))
         {
             sb.Append(indent);
             AppendKey(sb, key);
@@ -237,7 +302,7 @@ internal static class HumlSerializer
                 sb.Append(":: {}\n");
                 return;
             }
-            if (wantInline && AllDictionaryValuesAreScalar(dict))
+            if (wantInline && AllDictionaryValuesAreScalar(dict, options))
             {
                 EmitInlineDictionary(sb, indent, key, dict, options);
                 return;
@@ -263,7 +328,7 @@ internal static class HumlSerializer
                 sb.Append(":: []\n");
                 return;
             }
-            if (wantInline && items.TrueForAll(IsScalarValue))
+            if (wantInline && items.TrueForAll(i => IsScalarValue(i, options)))
             {
                 EmitInlineSequence(sb, indent, key, items, depth, options);
                 return;
@@ -276,10 +341,10 @@ internal static class HumlSerializer
         }
 
         // POCO object (not null — null was handled by IsScalarValue)
-        var valueType = value!.GetType();
-        if (IsUnsupportedType(valueType))
+        var valueType2 = value!.GetType();
+        if (IsUnsupportedType(valueType2))
             throw new HumlSerializeException(
-                $"Cannot serialize type '{valueType.FullName}': delegates, function pointers, and " +
+                $"Cannot serialize type '{valueType2.FullName}': delegates, function pointers, and " +
                 "similar non-data types are not supported by HumlSerializer.");
         sb.Append(indent);
         AppendKey(sb, key);
@@ -332,10 +397,10 @@ internal static class HumlSerializer
     /// Returns <c>true</c> when every value in <paramref name="dict"/> is a scalar
     /// (eligible for inline dictionary format).
     /// </summary>
-    private static bool AllDictionaryValuesAreScalar(IDictionary dict)
+    private static bool AllDictionaryValuesAreScalar(IDictionary dict, HumlOptions options)
     {
         foreach (DictionaryEntry e in dict)
-            if (!IsScalarValue(e.Value)) return false;
+            if (!IsScalarValue(e.Value, options)) return false;
         return true;
     }
 
@@ -353,7 +418,7 @@ internal static class HumlSerializer
         {
             sb.Append(indent);
             sb.Append("- ");
-            if (IsScalarValue(item))
+            if (IsScalarValue(item, options))
             {
                 SerializeValue(sb, item, depth + 1, options);
                 sb.Append('\n');
@@ -405,7 +470,7 @@ internal static class HumlSerializer
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /// <summary>Returns <c>true</c> if <paramref name="value"/> should be emitted inline after <c>: </c>.</summary>
-    private static bool IsScalarValue(object? value)
+    private static bool IsScalarValue(object? value, HumlOptions? options = null)
     {
         if (value is null) return true;
         if (value is string) return true;
@@ -413,6 +478,9 @@ internal static class HumlSerializer
         if (IsIntegerType(value)) return true;
         if (value is double or float or decimal) return true;
         if (value.GetType().IsEnum) return true;
+
+        // Converter-handled types are treated as scalar (inline after key: )
+        if (options != null && ConverterCache.TryGet(value.GetType(), options) != null) return true;
 
         // Anything else (collections, POCOs) is complex
         return false;
@@ -492,14 +560,6 @@ internal static class HumlSerializer
             sb.Append(key);
         }
     }
-
-    /// <summary>
-    /// Internal hook called by <see cref="HumlSerializerContext.AppendSerializedValue"/>.
-    /// Plan 12-02 will replace this stub with the real dispatch that checks converter priority.
-    /// For now it delegates directly to <see cref="SerializeValue"/>.
-    /// </summary>
-    internal static void SerializeValueInternal(System.Text.StringBuilder sb, object? value, int depth, HumlOptions options)
-        => SerializeValue(sb, value, depth, options);
 
     private static string VersionString(HumlSpecVersion version) =>
 #pragma warning disable CS0618 // V0_1 is deprecated but we must still handle it
