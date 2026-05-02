@@ -31,7 +31,7 @@ internal sealed record PropertyDescriptor(
         PropertyDescriptor[] Ordered,
         Dictionary<string, PropertyDescriptor> ByKey);
 
-    private static readonly ConcurrentDictionary<Type, PropertyDescriptorCache> Cache = new();
+    private static readonly ConcurrentDictionary<(Type, HumlNamingPolicy?), PropertyDescriptorCache> Cache = new();
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -39,16 +39,16 @@ internal sealed record PropertyDescriptor(
     /// Returns the cached array of <see cref="PropertyDescriptor"/> entries for <paramref name="type"/>.
     /// Properties are ordered base-class-first, then by declaration order within each type.
     /// </summary>
-    internal static PropertyDescriptor[] GetDescriptors(Type type) =>
-        Cache.GetOrAdd(type, BuildDescriptors).Ordered;
+    internal static PropertyDescriptor[] GetDescriptors(Type type, HumlNamingPolicy? policy = null) =>
+        Cache.GetOrAdd((type, policy), static key => BuildDescriptors(key.Item1, key.Item2)).Ordered;
 
     /// <summary>
     /// Returns the cached dictionary of <see cref="PropertyDescriptor"/> entries for
     /// <paramref name="type"/>, keyed by <see cref="HumlKey"/> with ordinal comparison.
     /// Used by the deserialiser for O(1) key lookup.
     /// </summary>
-    internal static Dictionary<string, PropertyDescriptor> GetLookup(Type type) =>
-        Cache.GetOrAdd(type, BuildDescriptors).ByKey;
+    internal static Dictionary<string, PropertyDescriptor> GetLookup(Type type, HumlNamingPolicy? policy = null) =>
+        Cache.GetOrAdd((type, policy), static key => BuildDescriptors(key.Item1, key.Item2)).ByKey;
 
     /// <summary>
     /// Clears the descriptor cache. Intended for use in test isolation only.
@@ -57,7 +57,7 @@ internal sealed record PropertyDescriptor(
 
     // ── Private implementation ────────────────────────────────────────────────
 
-    private static PropertyDescriptorCache BuildDescriptors(Type type)
+    private static PropertyDescriptorCache BuildDescriptors(Type type, HumlNamingPolicy? policy)
     {
         // Walk the inheritance chain from root to derived, collecting types in order.
         var typeChain = new List<Type>();
@@ -87,7 +87,9 @@ internal sealed record PropertyDescriptor(
 
                 // Resolve [HumlProperty] name and OmitIfDefault
                 var humlProp = prop.GetCustomAttribute<HumlPropertyAttribute>();
-                string humlKey = (humlProp?.Name is { Length: > 0 } name) ? name : prop.Name;
+                string humlKey = (humlProp?.Name is { Length: > 0 } explicitName)
+                    ? explicitName                                        // [HumlProperty] explicit name WINS — policy never applied
+                    : (policy?.ConvertName(prop.Name) ?? prop.Name);     // policy or identity
                 bool omitIfDefault = humlProp?.OmitIfDefault ?? false;
                 bool? inline = humlProp?.Inline switch
                 {

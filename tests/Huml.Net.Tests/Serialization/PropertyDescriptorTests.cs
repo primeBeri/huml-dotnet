@@ -48,6 +48,18 @@ public class PropertyDescriptorTests
         public int Value { get; set; }
     }
 
+    private class KebabPoco
+    {
+        public string? FullName { get; set; }
+        public int MaxDepth { get; set; }
+    }
+
+    private class AttributeWinsPoco
+    {
+        [HumlProperty("explicit-key")]
+        public string? PropertyName { get; set; }
+    }
+
     // ── Tests ─────────────────────────────────────────────────────────────────
 
     public PropertyDescriptorTests()
@@ -179,5 +191,67 @@ public class PropertyDescriptorTests
         var second = PropertyDescriptor.GetLookup(typeof(SimplePoco));
 
         object.ReferenceEquals(first, second).Should().BeFalse();
+    }
+
+    // ── Naming policy tests (NP-07, NP-08) ───────────────────────────────────
+
+    [Fact]
+    public void GetDescriptors_WithKebabCasePolicy_TransformsKeys()
+    {
+        var descriptors = PropertyDescriptor.GetDescriptors(typeof(KebabPoco), HumlNamingPolicy.KebabCase);
+
+        descriptors.Should().HaveCount(2);
+        descriptors[0].HumlKey.Should().Be("full-name");
+        descriptors[1].HumlKey.Should().Be("max-depth");
+    }
+
+    [Fact]
+    public void GetDescriptors_HumlPropertyAttributeWinsOverPolicy()
+    {
+        var descriptors = PropertyDescriptor.GetDescriptors(typeof(AttributeWinsPoco), HumlNamingPolicy.KebabCase);
+
+        descriptors.Should().HaveCount(1);
+        descriptors[0].HumlKey.Should().Be("explicit-key"); // attribute, NOT "property-name"
+    }
+
+    [Fact]
+    public void GetDescriptors_DifferentPolicies_ReturnSeparateCacheEntries()
+    {
+        var noPolicy = PropertyDescriptor.GetDescriptors(typeof(KebabPoco), null);
+        var withKebab = PropertyDescriptor.GetDescriptors(typeof(KebabPoco), HumlNamingPolicy.KebabCase);
+
+        object.ReferenceEquals(noPolicy, withKebab).Should().BeFalse();
+        noPolicy[0].HumlKey.Should().Be("FullName");    // identity
+        withKebab[0].HumlKey.Should().Be("full-name");  // kebab
+    }
+
+    [Fact]
+    public void GetDescriptors_SamePolicyCached_ReturnsSameReference()
+    {
+        var first = PropertyDescriptor.GetDescriptors(typeof(KebabPoco), HumlNamingPolicy.KebabCase);
+        var second = PropertyDescriptor.GetDescriptors(typeof(KebabPoco), HumlNamingPolicy.KebabCase);
+
+        object.ReferenceEquals(first, second).Should().BeTrue();
+    }
+
+    [Fact]
+    public void ClearCache_ClearsAllPolicyEntries()
+    {
+        var before = PropertyDescriptor.GetDescriptors(typeof(KebabPoco), HumlNamingPolicy.KebabCase);
+        PropertyDescriptor.ClearCache();
+        var after = PropertyDescriptor.GetDescriptors(typeof(KebabPoco), HumlNamingPolicy.KebabCase);
+
+        object.ReferenceEquals(before, after).Should().BeFalse();
+    }
+
+    [Fact]
+    public void GetLookup_WithKebabCasePolicy_KeysAreTransformed()
+    {
+        var lookup = PropertyDescriptor.GetLookup(typeof(KebabPoco), HumlNamingPolicy.KebabCase);
+
+        lookup.Should().ContainKey("full-name");
+        lookup.Should().ContainKey("max-depth");
+        lookup.Should().NotContainKey("FullName");
+        lookup.Should().NotContainKey("MaxDepth");
     }
 }
