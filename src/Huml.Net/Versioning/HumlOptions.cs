@@ -1,3 +1,5 @@
+using Huml.Net.Serialization;
+
 namespace Huml.Net.Versioning;
 
 /// <summary>Configuration options for HUML parsing and serialisation.</summary>
@@ -50,6 +52,20 @@ public sealed class HumlOptions
     /// Collections containing non-scalar items silently fall back to multiline.
     /// </summary>
     public CollectionFormat CollectionFormat { get; init; } = CollectionFormat.Multiline;
+
+    /// <summary>
+    /// The naming policy used to convert .NET property names to HUML keys during
+    /// serialisation and deserialisation. <c>null</c> (the default) means the .NET
+    /// property name is used as-is (ordinal-exact, PascalCase by default in C#).
+    /// </summary>
+    /// <remarks>
+    /// Use <see cref="HumlNamingPolicy.KebabCase"/> for HUML documents
+    /// that use <c>kebab-case</c> keys (the most common HUML convention). A
+    /// <see cref="Serialization.HumlPropertyAttribute"/> name override always takes
+    /// precedence over this policy. This policy applies to .NET property names only —
+    /// it does not affect <c>Dictionary&lt;string, T&gt;</c> string keys.
+    /// </remarks>
+    public HumlNamingPolicy? PropertyNamingPolicy { get; init; }
 
     private int _maxRecursionDepth = 64;
 
