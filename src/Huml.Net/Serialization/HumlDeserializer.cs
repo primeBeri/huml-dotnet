@@ -52,6 +52,33 @@ internal static class HumlDeserializer
         return DeserializeNode(doc, targetType, opts);
     }
 
+    /// <summary>
+    /// Populates an existing instance of <typeparamref name="T"/> with values deserialised
+    /// from a HUML character span, overlaying values onto the caller-supplied instance
+    /// rather than constructing a fresh one.
+    /// </summary>
+    /// <typeparam name="T">The type of the existing instance to populate.</typeparam>
+    /// <param name="huml">The HUML document as a character span.</param>
+    /// <param name="existing">The existing instance to populate. Must not be <c>null</c>.</param>
+    /// <param name="options">Parsing options; defaults to <see cref="HumlOptions.Default"/> if null.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="existing"/> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentException">Thrown when <typeparamref name="T"/> is a value type (struct).</exception>
+    internal static void Populate<T>(ReadOnlySpan<char> huml, T existing, HumlOptions? options = null)
+    {
+        throw new NotSupportedException("Populate not yet implemented.");
+    }
+
+    /// <summary>
+    /// Populates an existing object instance by overlaying HUML mapping entries onto its
+    /// properties. Does not construct a new instance; uses the
+    /// caller-supplied <paramref name="existing"/> instance directly.
+    /// </summary>
+    private static void PopulateMappingEntries(
+        IReadOnlyList<HumlNode> entries, object existing, Type targetType, HumlOptions options)
+    {
+        throw new NotSupportedException("PopulateMappingEntries not yet implemented.");
+    }
+
     // ── Core dispatch ─────────────────────────────────────────────────────────
 
     /// <summary>

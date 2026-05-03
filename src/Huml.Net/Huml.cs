@@ -81,6 +81,44 @@ public static class Huml
         => Serialization.HumlDeserializer.Deserialize(huml, targetType, options);
 
     /// <summary>
+    /// Populates an existing instance of <typeparamref name="T"/> with values deserialised
+    /// from a HUML string. Properties present in the HUML document overwrite the
+    /// corresponding property on <paramref name="existing"/>; properties absent from the
+    /// document are left unchanged.
+    /// This overload converts <paramref name="huml"/> to a span and delegates to the
+    /// <see cref="Populate{T}(ReadOnlySpan{char}, T, HumlOptions?)"/> implementation.
+    /// </summary>
+    /// <typeparam name="T">The type of the existing instance. Must be a reference type.</typeparam>
+    /// <param name="huml">The HUML string.</param>
+    /// <param name="existing">The existing instance to populate. Must not be <c>null</c>.</param>
+    /// <param name="options">Parsing options; defaults to <see cref="HumlOptions.Default"/>.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="existing"/> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentException">Thrown when <typeparamref name="T"/> is a value type (struct).</exception>
+    /// <exception cref="HumlParseException">Thrown when the HUML input is invalid.</exception>
+    /// <exception cref="HumlDeserializeException">Thrown when mapping to <typeparamref name="T"/> fails.</exception>
+    public static void Populate<T>(string huml, T existing, HumlOptions? options = null)
+        => Populate<T>(huml.AsSpan(), existing, options);
+
+    /// <summary>
+    /// Populates an existing instance of <typeparamref name="T"/> with values deserialised
+    /// from a HUML character span. Properties present in the HUML document overwrite the
+    /// corresponding property on <paramref name="existing"/>; properties absent from the
+    /// document are left unchanged. This is the single implementation overload; the
+    /// <see cref="Populate{T}(string, T, HumlOptions?)"/> overload delegates here via
+    /// <c>AsSpan()</c>.
+    /// </summary>
+    /// <typeparam name="T">The type of the existing instance. Must be a reference type.</typeparam>
+    /// <param name="huml">The HUML document as a character span.</param>
+    /// <param name="existing">The existing instance to populate. Must not be <c>null</c>.</param>
+    /// <param name="options">Parsing options; defaults to <see cref="HumlOptions.Default"/>.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="existing"/> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentException">Thrown when <typeparamref name="T"/> is a value type (struct).</exception>
+    /// <exception cref="HumlParseException">Thrown when the HUML input is invalid.</exception>
+    /// <exception cref="HumlDeserializeException">Thrown when mapping to <typeparamref name="T"/> fails.</exception>
+    public static void Populate<T>(ReadOnlySpan<char> huml, T existing, HumlOptions? options = null)
+        => Serialization.HumlDeserializer.Populate<T>(huml, existing, options);
+
+    /// <summary>
     /// Parses a HUML string and returns the document AST without mapping to a .NET type.
     /// Useful for validation — throws <see cref="HumlParseException"/> if the input is invalid.
     /// </summary>
