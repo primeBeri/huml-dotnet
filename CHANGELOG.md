@@ -4,7 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+**Versioning:** from `0.2.0` onward, the first two digits of the package version mirror the
+targeted HUML spec version (`0.2.x` → HUML v0.2, `0.3.x` → HUML v0.3).
+See [docs/versioning.md](docs/versioning.md) for the full policy.
+
+## [Unreleased] — upcoming 0.2.0-alpha.1
+
+### Added
+- **Source positions:** `Line` and `Column` properties on all AST nodes; `HumlDeserializeException` now includes the source position of the offending node.
+- **Naming policy:** `HumlOptions.PropertyNamingPolicy` with built-in `HumlNamingPolicy.KebabCase`, `SnakeCase`, `CamelCase`, and `PascalCase` instances.
+- **Enum support:** `HumlEnumValueAttribute` for custom member names; enum properties serialise as quoted strings and deserialise via name lookup with policy-aware transforms.
+- **Custom converters:** `HumlConverter<T>` abstract base, `[HumlConverter]` attribute for per-property or per-type binding, and `HumlOptions.Converters` for options-level registration.
+- **Populate:** `Huml.Populate<T>(string, T, HumlOptions?)` and `ReadOnlySpan<char>` overload for overlaying a HUML document onto an existing object instance.
 
 ## [0.1.0-alpha.1] - 2026-05-01
 
@@ -20,4 +31,5 @@ Initial alpha release.
 - **CI/NuGet:** GitHub Actions pipeline with SourceLink, MinVer, and OIDC Trusted Publishing.
 
 [Unreleased]: https://github.com/primeBeri/huml-dotnet/compare/v0.1.0-alpha.1...HEAD
+[0.2.0-alpha.1]: https://github.com/primeBeri/huml-dotnet/compare/v0.1.0-alpha.1...v0.2.0-alpha.1
 [0.1.0-alpha.1]: https://github.com/primeBeri/huml-dotnet/releases/tag/v0.1.0-alpha.1
