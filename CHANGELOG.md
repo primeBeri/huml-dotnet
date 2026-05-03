@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 targeted HUML spec version (`0.2.x` → HUML v0.2, `0.3.x` → HUML v0.3).
 See [docs/versioning.md](docs/versioning.md) for the full policy.
 
-## [Unreleased] — upcoming 0.2.0-alpha.1
+## [0.2.0-alpha.1] - 2026-05-03
 
 ### Added
 - **Source positions:** `Line` and `Column` properties on all AST nodes; `HumlDeserializeException` now includes the source position of the offending node.
@@ -30,6 +30,6 @@ Initial alpha release.
 - **Public API:** `System.Text.Json`-style static `Huml` facade with `Serialize`, `Deserialize`, and `Parse` overloads.
 - **CI/NuGet:** GitHub Actions pipeline with SourceLink, MinVer, and OIDC Trusted Publishing.
 
-[Unreleased]: https://github.com/primeBeri/huml-dotnet/compare/v0.1.0-alpha.1...HEAD
+[Unreleased]: https://github.com/primeBeri/huml-dotnet/compare/v0.2.0-alpha.1...HEAD
 [0.2.0-alpha.1]: https://github.com/primeBeri/huml-dotnet/compare/v0.1.0-alpha.1...v0.2.0-alpha.1
 [0.1.0-alpha.1]: https://github.com/primeBeri/huml-dotnet/releases/tag/v0.1.0-alpha.1

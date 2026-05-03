@@ -63,6 +63,41 @@ public class ServerConfig
 }
 ```
 
+### Example 4: Naming policy
+
+```csharp
+using Huml.Net;
+using Huml.Net.Serialization;
+
+public class ServerConfig
+{
+    public string HostName { get; set; } = string.Empty;
+    public int MaxConnections { get; set; }
+}
+
+var options = new HumlOptions { PropertyNamingPolicy = HumlNamingPolicy.KebabCase };
+var config = Huml.Deserialize<ServerConfig>("""
+    %HUML v0.2.0
+    host-name: "db.example.com"
+    max-connections: 100
+    """, options);
+// config.HostName == "db.example.com", config.MaxConnections == 100
+```
+
+### Example 5: Populate existing instance
+
+```csharp
+using Huml.Net;
+
+var defaults = new ServerConfig { HostName = "localhost", MaxConnections = 10 };
+Huml.Populate("""
+    %HUML v0.2.0
+    max-connections: 50
+    """, defaults, new HumlOptions { PropertyNamingPolicy = HumlNamingPolicy.KebabCase });
+// defaults.HostName is still "localhost" (not in the document)
+// defaults.MaxConnections is now 50 (overwritten)
+```
+
 ## Features
 
 - Full HUML v0.1 and v0.2 spec compliance (validated against `huml-lang/tests` fixture suite)
@@ -70,6 +105,11 @@ public class ServerConfig
 - Reflection-based serialisation with declaration-order property emission
 - `[HumlProperty]` and `[HumlIgnore]` attributes
 - Inline and multiline collection format control
+- **Naming policy:** `HumlNamingPolicy.KebabCase`, `SnakeCase`, `CamelCase`, `PascalCase` via `HumlOptions.PropertyNamingPolicy`
+- **Enum support:** `HumlEnumValueAttribute` for custom member names; round-trips through quoted strings
+- **Custom converters:** `HumlConverter<T>` abstract base, `[HumlConverter]` attribute, and `HumlOptions.Converters`
+- **Populate:** `Huml.Populate<T>()` overlays a HUML document onto an existing object instance
+- **AST source positions:** `Line` and `Column` on all AST nodes; `HumlDeserializeException` reports the source position
 - Zero external runtime dependencies
 - Multi-TFM: netstandard2.1, .NET 8, .NET 9, .NET 10
 
@@ -82,6 +122,8 @@ public class ServerConfig
 | `UnknownVersionBehaviour` | `UnknownVersionBehaviour` | `Throw`     | What happens when a `%HUML` header declares an unrecognised version                                                        |
 | `CollectionFormat`        | `CollectionFormat`        | `Multiline` | Global default for collection serialisation format; per-property override via `[HumlProperty(Inline = InlineMode.Inline)]` |
 | `MaxRecursionDepth`       | `int`                     | `64`        | Max nesting depth before `HumlParseException` is thrown                                                                    |
+| `PropertyNamingPolicy` | `HumlNamingPolicy?`       | `null`      | Converts .NET property names to HUML keys. `null` = use property name as-is. Built-ins: `KebabCase`, `SnakeCase`, `CamelCase`, `PascalCase` |
+| `Converters`           | `IList<HumlConverter>`    | `[]`        | Custom converters consulted during serialisation and deserialisation. First matching `CanConvert` wins.                                      |
 
 ## Compatibility
 
@@ -101,6 +143,10 @@ public class ServerConfig
 - [AST Usage Guide](docs/ast-usage.md)
 - [Error Handling](docs/error-handling.md)
 - [Inline Serialisation](docs/inline-serialisation.md)
+- [Naming Policy](docs/naming-policy.md)
+- [Enum Serialisation](docs/enum-serialisation.md)
+- [Custom Converters](docs/custom-converters.md)
+- [Populate](docs/populate.md)
 
 ## Links
 
