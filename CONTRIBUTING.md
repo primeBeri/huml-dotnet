@@ -112,6 +112,18 @@ These guides explain the internal architecture for contributors:
 - [Extending the Library](docs/internals/extending.md) — checklists for adding new AST nodes,
   token types, and serialisation/deserialisation support for new .NET types.
 
+## Versioning
+
+Huml.Net package versions mirror the HUML spec version they target. The first two digits always
+match the spec: `0.2.x` targets HUML v0.2, `0.3.x` will target HUML v0.3.
+
+Full policy — including the alpha/beta/rc/stable release tier progression and the definition of
+what earns a patch bump — is documented in [docs/versioning.md](docs/versioning.md).
+
+**Pre-release identifier syntax:** always use hyphens as required by SemVer 2.0
+(`0.2.0-alpha.1`, never `0.2.0_alpha.1`). MinVer enforces this when deriving versions from git
+tags.
+
 ## Pull Request Process
 
 1. Fork the repository and create a branch from `main`.
