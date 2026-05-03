@@ -375,6 +375,7 @@ public class HumlDeserializerTests
 
         var ex = act.Should().Throw<HumlDeserializeException>().Which;
         ex.Line.Should().Be(1);
+        ex.Key.Should().Be("Count");
     }
 
     [Fact]
@@ -389,19 +390,20 @@ public class HumlDeserializerTests
 
         var ex = act.Should().Throw<HumlDeserializeException>().Which;
         ex.Line.Should().Be(2);
+        ex.Key.Should().Be("Count");
     }
 
     [Fact]
     public void Deserialize_RootScalarTypeCoercionFailure_ExceptionCarriesLine1()
     {
-        // NaN cannot be coerced to int — exercises the scalar branch in DeserializeNode
-        // (called from DeserializeMappingEntries when mapping.Value is a HumlScalar)
+        // NaN cannot be coerced to int — exercises the scalar branch in DeserializeMappingEntries
         const string huml = "Count: nan";
 
         var act = () => HumlDeserializer.Deserialize<SimplePoco>(huml);
 
         var ex = act.Should().Throw<HumlDeserializeException>().Which;
         ex.Line.Should().Be(1);
+        ex.Key.Should().Be("Count");
     }
 
     // ── Untyped overload ──────────────────────────────────────────────────────

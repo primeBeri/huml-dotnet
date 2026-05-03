@@ -264,6 +264,44 @@ public class HumlNodePositionTests
         var nested = outer!.Value as HumlDocument;
         nested.Should().NotBeNull();
         nested!.Line.Should().Be(1);
+        // 'outer' is 5 chars; the '::' token starts at column 5 (0-based)
+        nested.Column.Should().Be(5);
+    }
+
+    [Fact]
+    public void Parse_DeeplyNestedDocument_HumlDocumentHasIndicatorColumn()
+    {
+        // "  inner::" at indent 2: '::' is at column 7 (2 + len("inner") = 7)
+        var doc = new HumlParser("outer::\n  inner::\n    a: 1", HumlOptions.Default).Parse();
+
+        var outer = doc.Entries[0] as HumlMapping;
+        outer.Should().NotBeNull();
+        var outerDoc = outer!.Value as HumlDocument;
+        outerDoc.Should().NotBeNull();
+
+        var inner = outerDoc!.Entries[0] as HumlMapping;
+        inner.Should().NotBeNull();
+        var innerDoc = inner!.Value as HumlDocument;
+        innerDoc.Should().NotBeNull();
+        innerDoc!.Column.Should().Be(7);
+    }
+
+    [Fact]
+    public void Parse_DeeplyNestedSequence_HumlSequenceHasIndicatorColumn()
+    {
+        // "  items::" at indent 2: '::' is at column 7 (2 + len("items") = 7)
+        var doc = new HumlParser("outer::\n  items::\n    - 1\n    - 2", HumlOptions.Default).Parse();
+
+        var outer = doc.Entries[0] as HumlMapping;
+        outer.Should().NotBeNull();
+        var outerDoc = outer!.Value as HumlDocument;
+        outerDoc.Should().NotBeNull();
+
+        var items = outerDoc!.Entries[0] as HumlMapping;
+        items.Should().NotBeNull();
+        var seq = items!.Value as HumlSequence;
+        seq.Should().NotBeNull();
+        seq!.Column.Should().Be(7);
     }
 
     [Fact]

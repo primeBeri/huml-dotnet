@@ -181,7 +181,7 @@ internal static class HumlDeserializer
         }
 
         if (node is HumlScalar scalar)
-            return CoerceScalar(scalar, targetType, key: string.Empty, line: scalar.Line, options);
+            return CoerceScalar(scalar, targetType, key: null, line: scalar.Line, options);
 
         if (node is HumlDocument doc)
             return DeserializeMappingEntries(doc.Entries, targetType, options);
@@ -386,8 +386,10 @@ internal static class HumlDeserializer
     /// Coerces a <see cref="HumlScalar"/> to <paramref name="targetType"/>.
     /// Handles null, bool, string, integer, float, NaN, and Inf kinds with diagnostic
     /// exceptions carrying <paramref name="key"/> and <paramref name="line"/> on failure.
+    /// Pass <c>null</c> for <paramref name="key"/> when there is no enclosing mapping key
+    /// (e.g. a root-level scalar document); the resulting exception omits the key prefix.
     /// </summary>
-    private static object? CoerceScalar(HumlScalar scalar, Type targetType, string key, int line, HumlOptions options)
+    private static object? CoerceScalar(HumlScalar scalar, Type targetType, string? key, int line, HumlOptions options)
     {
         // Unwrap Nullable<T> to its underlying type for comparison
         var underlying = Nullable.GetUnderlyingType(targetType) ?? targetType;
