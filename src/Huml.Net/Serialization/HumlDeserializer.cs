@@ -65,7 +65,20 @@ internal static class HumlDeserializer
     /// <exception cref="ArgumentException">Thrown when <typeparamref name="T"/> is a value type (struct).</exception>
     internal static void Populate<T>(ReadOnlySpan<char> huml, T existing, HumlOptions? options = null)
     {
-        throw new NotSupportedException("Populate not yet implemented.");
+        // Guard: value types cannot be populated in-place — C# passes structs by copy.
+        if (typeof(T).IsValueType)
+            throw new ArgumentException(
+                "Populate<T> cannot populate a value type — use Deserialize<T> to create a new instance.",
+                nameof(existing));
+
+        // Guard: existing must not be null.
+        // NOTE: ArgumentNullException.ThrowIfNull is not available on netstandard2.1.
+        if (existing is null)
+            throw new ArgumentNullException(nameof(existing));
+
+        var opts = options ?? HumlOptions.Default;
+        var doc = new HumlParser(huml.ToString(), opts).Parse();
+        PopulateMappingEntries(doc.Entries, existing, typeof(T), opts);
     }
 
     /// <summary>
