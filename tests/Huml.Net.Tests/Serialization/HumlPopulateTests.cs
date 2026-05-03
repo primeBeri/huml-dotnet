@@ -46,6 +46,8 @@ public class HumlPopulateTests
 
     private sealed class UpperCaseConverter : HumlConverter<string?>
     {
+        // typeof(string?) at runtime equals typeof(string) — nullability is compile-time only.
+        // The property is declared string? but the CLR passes typeof(string) here.
         public override bool CanConvert(Type t) => t == typeof(string);
 
         public override string? Read(HumlNode node)
@@ -134,7 +136,7 @@ public class HumlPopulateTests
     public void Populate_NullExisting_ThrowsArgumentNullException()
     {
         ConfigPoco? existing = null;
-        var act = () => Huml.Populate<ConfigPoco>("%HUML v0.2.0\n", existing!);
+        var act = () => Huml.Populate<ConfigPoco>("@@invalid@@", existing!);
 
         act.Should().Throw<ArgumentNullException>();
     }
