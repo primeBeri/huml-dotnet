@@ -65,13 +65,13 @@ Input string
 
 All nodes in `src/Huml.Net/Parser/` are `public sealed record` types:
 
-| Type | Role |
-|------|------|
-| `HumlNode` | Abstract base record |
+| Type           | Role                                                           |
+| -------------- | -------------------------------------------------------------- |
+| `HumlNode`     | Abstract base record                                           |
 | `HumlDocument` | Root / mapping block — holds `IReadOnlyList<HumlNode>` entries |
-| `HumlMapping` | Single key-value pair (`Key: string`, `Value: HumlNode`) |
-| `HumlScalar` | Leaf value (`Kind: ScalarKind`, `Value: object?`) |
-| `HumlSequence` | Ordered list of `HumlNode` items |
+| `HumlMapping`  | Single key-value pair (`Key: string`, `Value: HumlNode`)       |
+| `HumlScalar`   | Leaf value (`Kind: ScalarKind`, `Value: object?`)              |
+| `HumlSequence` | Ordered list of `HumlNode` items                               |
 
 `HumlDocument` is reused for both the document root and nested mapping blocks (inline dicts also produce a `HumlDocument`).
 
