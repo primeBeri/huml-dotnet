@@ -26,6 +26,7 @@ public class HumlDeserializeExceptionTests
         var ex = new HumlDeserializeException("msg");
         ex.Key.Should().BeNull();
         ex.Line.Should().BeNull();
+        ex.Column.Should().BeNull();
     }
 
     [Fact]
@@ -61,5 +62,35 @@ public class HumlDeserializeExceptionTests
     {
         var ex = new HumlDeserializeException("type mismatch", "myKey", 42);
         ex.Message.Should().Contain("type mismatch");
+    }
+
+    [Fact]
+    public void Four_param_ctor_sets_column_property()
+    {
+        var ex = new HumlDeserializeException("type mismatch", "myKey", 42, 7);
+        ex.Column.Should().Be(7);
+    }
+
+    [Fact]
+    public void Four_param_ctor_sets_line_and_key()
+    {
+        var ex = new HumlDeserializeException("type mismatch", "myKey", 42, 7);
+        ex.Line.Should().Be(42);
+        ex.Key.Should().Be("myKey");
+    }
+
+    [Fact]
+    public void Four_param_ctor_message_contains_line_and_column()
+    {
+        var ex = new HumlDeserializeException("type mismatch", "myKey", 42, 7);
+        ex.Message.Should().Contain("[line 42, col 7]");
+    }
+
+    [Fact]
+    public void Four_param_ctor_null_key_emits_message_as_is()
+    {
+        var ex = new HumlDeserializeException("bare error", null, 1, 0);
+        ex.Message.Should().Be("bare error");
+        ex.Column.Should().Be(0);
     }
 }

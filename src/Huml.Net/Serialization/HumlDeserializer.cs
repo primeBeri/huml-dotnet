@@ -115,7 +115,8 @@ internal static class HumlDeserializer
                 throw new HumlDeserializeException(
                     $"Property '{descriptor.Property.Name}' on type '{targetType.Name}' is init-only and cannot be deserialised.",
                     mapping.Key,
-                    line: mapping.Line);
+                    line: mapping.Line,
+                    column: mapping.Column);
 
             // Read-only (no setter) — skip silently (POP-10)
             if (descriptor.Property.SetMethod is null)
@@ -132,7 +133,8 @@ internal static class HumlDeserializer
                     deserializedValue,
                     descriptor.Property.PropertyType,
                     mapping.Key,
-                    GetNodeLine(mapping.Value));
+                    GetNodeLine(mapping.Value),
+                    GetNodeColumn(mapping.Value));
             }
             else if (ConverterCache.TryGet(descriptor.Property.PropertyType, options) is { } propConverter)
             {
@@ -142,12 +144,13 @@ internal static class HumlDeserializer
                     deserializedValue,
                     descriptor.Property.PropertyType,
                     mapping.Key,
-                    GetNodeLine(mapping.Value));
+                    GetNodeLine(mapping.Value),
+                    GetNodeColumn(mapping.Value));
             }
             else if (mapping.Value is HumlScalar s)
             {
                 // Direct scalar coercion — includes key in diagnostic exception
-                deserializedValue = CoerceScalar(s, descriptor.Property.PropertyType, mapping.Key, s.Line, options);
+                deserializedValue = CoerceScalar(s, descriptor.Property.PropertyType, mapping.Key, s.Line, s.Column, options);
             }
             else
             {
@@ -176,12 +179,12 @@ internal static class HumlDeserializer
         if (typeConverter != null)
         {
             var result = typeConverter.ReadObject(node);
-            ThrowIfNullForNonNullable(result, targetType, key: string.Empty, line: GetNodeLine(node));
+            ThrowIfNullForNonNullable(result, targetType, key: string.Empty, line: GetNodeLine(node), column: GetNodeColumn(node));
             return result;
         }
 
         if (node is HumlScalar scalar)
-            return CoerceScalar(scalar, targetType, key: null, line: scalar.Line, options);
+            return CoerceScalar(scalar, targetType, key: null, line: scalar.Line, column: scalar.Column, options);
 
         if (node is HumlDocument doc)
             return DeserializeMappingEntries(doc.Entries, targetType, options);
@@ -244,7 +247,8 @@ internal static class HumlDeserializer
                 throw new HumlDeserializeException(
                     $"Property '{descriptor.Property.Name}' on type '{targetType.Name}' is init-only and cannot be deserialised.",
                     mapping.Key,
-                    line: mapping.Line);
+                    line: mapping.Line,
+                    column: mapping.Column);
 
             // Read-only (no setter) — skip silently
             if (descriptor.Property.SetMethod is null)
@@ -260,7 +264,8 @@ internal static class HumlDeserializer
                     deserializedValue,
                     descriptor.Property.PropertyType,
                     mapping.Key,
-                    GetNodeLine(mapping.Value));
+                    GetNodeLine(mapping.Value),
+                    GetNodeColumn(mapping.Value));
             }
             else if (ConverterCache.TryGet(descriptor.Property.PropertyType, options) is { } propConverter)
             {
@@ -270,12 +275,13 @@ internal static class HumlDeserializer
                     deserializedValue,
                     descriptor.Property.PropertyType,
                     mapping.Key,
-                    GetNodeLine(mapping.Value));
+                    GetNodeLine(mapping.Value),
+                    GetNodeColumn(mapping.Value));
             }
             else if (mapping.Value is HumlScalar s)
             {
                 // Direct scalar coercion — includes key in diagnostic exception (WR-01 fix preserved)
-                deserializedValue = CoerceScalar(s, descriptor.Property.PropertyType, mapping.Key, s.Line, options);
+                deserializedValue = CoerceScalar(s, descriptor.Property.PropertyType, mapping.Key, s.Line, s.Column, options);
             }
             else
             {
@@ -385,11 +391,12 @@ internal static class HumlDeserializer
     /// <summary>
     /// Coerces a <see cref="HumlScalar"/> to <paramref name="targetType"/>.
     /// Handles null, bool, string, integer, float, NaN, and Inf kinds with diagnostic
-    /// exceptions carrying <paramref name="key"/> and <paramref name="line"/> on failure.
+    /// exceptions carrying <paramref name="key"/>, <paramref name="line"/>, and
+    /// <paramref name="column"/> on failure.
     /// Pass <c>null</c> for <paramref name="key"/> when there is no enclosing mapping key
     /// (e.g. a root-level scalar document); the resulting exception omits the key prefix.
     /// </summary>
-    private static object? CoerceScalar(HumlScalar scalar, Type targetType, string? key, int line, HumlOptions options)
+    private static object? CoerceScalar(HumlScalar scalar, Type targetType, string? key, int line, int column, HumlOptions options)
     {
         // Unwrap Nullable<T> to its underlying type for comparison
         var underlying = Nullable.GetUnderlyingType(targetType) ?? targetType;
@@ -405,7 +412,7 @@ internal static class HumlDeserializer
                         return null;
                     throw new HumlDeserializeException(
                         $"Cannot assign null to non-nullable enum type '{underlying.Name}'.",
-                        key, line);
+                        key, line, column);
                 }
                 if (scalar.Kind == ScalarKind.String)
                 {
@@ -414,7 +421,7 @@ internal static class HumlDeserializer
                         return enumResult;
                     throw new HumlDeserializeException(
                         $"Value \"{raw}\" is not a valid member of enum '{underlying.Name}'.",
-                        key, line);
+                        key, line, column);
                 }
                 if (scalar.Kind == ScalarKind.Integer)
                 {
@@ -422,7 +429,7 @@ internal static class HumlDeserializer
                 }
                 throw new HumlDeserializeException(
                     $"Cannot convert {scalar.Kind} to enum '{underlying.Name}'.",
-                    key, line);
+                    key, line, column);
             }
 
             switch (scalar.Kind)
@@ -432,7 +439,7 @@ internal static class HumlDeserializer
                         return null;
                     throw new HumlDeserializeException(
                         $"Cannot assign null to non-nullable type '{targetType.Name}'.",
-                        key, line);
+                        key, line, column);
 
                 case ScalarKind.Bool:
                     if (underlying == typeof(bool))
@@ -459,7 +466,7 @@ internal static class HumlDeserializer
                         return float.NaN;
                     throw new HumlDeserializeException(
                         $"Cannot convert NaN to type '{targetType.Name}'.",
-                        key, line);
+                        key, line, column);
 
                 case ScalarKind.Inf:
                 {
@@ -474,13 +481,13 @@ internal static class HumlDeserializer
 
                     throw new HumlDeserializeException(
                         $"Cannot convert Inf to type '{targetType.Name}'.",
-                        key, line);
+                        key, line, column);
                 }
 
                 default:
                     throw new HumlDeserializeException(
                         $"Unhandled scalar kind '{scalar.Kind}'.",
-                        key, line);
+                        key, line, column);
             }
         }
         catch (HumlDeserializeException)
@@ -491,19 +498,19 @@ internal static class HumlDeserializer
         {
             throw new HumlDeserializeException(
                 $"Cannot convert {scalar.Kind} to '{targetType.Name}': {ex.Message}",
-                key, line);
+                key, line, column);
         }
         catch (FormatException ex)
         {
             throw new HumlDeserializeException(
                 $"Cannot convert {scalar.Kind} to '{targetType.Name}': {ex.Message}",
-                key, line);
+                key, line, column);
         }
         catch (OverflowException ex)
         {
             throw new HumlDeserializeException(
                 $"Cannot convert {scalar.Kind} to '{targetType.Name}': {ex.Message}",
-                key, line);
+                key, line, column);
         }
     }
 
@@ -513,16 +520,19 @@ internal static class HumlDeserializer
     /// Throws <see cref="HumlDeserializeException"/> if <paramref name="value"/> is null but
     /// <paramref name="targetType"/> is a non-nullable value type.
     /// </summary>
-    private static void ThrowIfNullForNonNullable(object? value, Type targetType, string key, int line)
+    private static void ThrowIfNullForNonNullable(object? value, Type targetType, string key, int line, int column)
     {
         if (value is null && targetType.IsValueType && Nullable.GetUnderlyingType(targetType) == null)
             throw new HumlDeserializeException(
                 $"Converter returned null for non-nullable value type '{targetType.Name}'.",
-                key, line);
+                key, line, column);
     }
 
     /// <summary>Returns the source line from a HumlNode. All nodes inherit Line from HumlNode.</summary>
     private static int GetNodeLine(HumlNode node) => node.Line;
+
+    /// <summary>Returns the source column from a HumlNode. All nodes inherit Column from HumlNode.</summary>
+    private static int GetNodeColumn(HumlNode node) => node.Column;
 
     /// <summary>
     /// Returns <c>true</c> if <paramref name="type"/> is <c>Dictionary&lt;string, T&gt;</c>

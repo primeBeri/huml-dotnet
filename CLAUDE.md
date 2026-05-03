@@ -124,3 +124,11 @@ result.Property.Should().Be(expected);
 ```
 
 Use `AwesomeAssertions` (`.Should()` extension methods) from the `AwesomeAssertions` namespace, not `FluentAssertions`.
+
+## Changelog
+
+`CHANGELOG.md` follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/) and **must always have an `## [Unreleased]` section** at the top, above all versioned entries.
+
+**Rule:** As each phase lands, add every user-visible change (new features, behaviour changes, bug fixes) under `## [Unreleased]`. Do not wait until release time — update it incrementally as work progresses.
+
+At release time, rename `## [Unreleased]` to the versioned entry (e.g. `## [0.3.0-alpha.1] - YYYY-MM-DD`) and immediately insert a fresh `## [Unreleased]\n\n(no changes yet)` section above it.

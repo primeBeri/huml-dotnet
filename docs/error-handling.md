@@ -23,7 +23,7 @@ Huml.Net throws four exception types, all in the namespace `Huml.Net.Exceptions`
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `Huml.Parse()`          | `HumlParseException`, `HumlUnsupportedVersionException`                                                                           |
 | `Huml.Deserialize<T>()` | `HumlParseException` (parse stage), `HumlDeserializeException` (mapping stage), `HumlUnsupportedVersionException` (version stage) |
-| `Huml.Populate<T>()`    | `ArgumentNullException` (null existing instance), `ArgumentException` (T is a value type), `HumlParseException` (parse stage), `HumlDeserializeException` (mapping stage), `HumlUnsupportedVersionException` (version stage) |
+| `Huml.Populate<T>()`    | `ArgumentNullException` (null `huml` string or null existing instance), `ArgumentException` (T is a value type), `HumlParseException` (parse stage), `HumlDeserializeException` (mapping stage), `HumlUnsupportedVersionException` (version stage) |
 | `Huml.Serialize<T>()`   | `HumlSerializeException`                                                                                                          |
 
 ## Exception Properties
@@ -43,7 +43,7 @@ Thrown when valid HUML cannot be mapped to the target .NET type.
 - `string? Key` — the HUML key where the error occurred (may be `null` if no key context)
 - `int? Line` — 1-based line number (may be `null` if no line context)
 - `int? Column` — 0-based column position (may be `null` if no column context)
-- `Message` format when key and line are available: `[line {line}] Key '{key}': {description}`
+- `Message` format when key and line are available: `[line {line}, col {column}] Key '{key}': {description}`
 
 ### HumlSerializeException
 
@@ -72,7 +72,7 @@ catch (HumlParseException ex)
 }
 catch (HumlDeserializeException ex) when (ex.Key is not null)
 {
-    Console.WriteLine($"Mapping error at key '{ex.Key}' (line {ex.Line}): {ex.Message}");
+    Console.WriteLine($"Mapping error at key '{ex.Key}' (line {ex.Line}, col {ex.Column}): {ex.Message}");
 }
 catch (HumlDeserializeException ex)
 {

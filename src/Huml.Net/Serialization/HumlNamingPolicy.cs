@@ -32,7 +32,7 @@ public abstract class HumlNamingPolicy
     /// <c>fullName</c> → <c>FullName</c>.</summary>
     public static HumlNamingPolicy PascalCase { get; } = new PascalCasePolicy();
 
-    /// <summary>Initializes a new instance of <see cref="HumlNamingPolicy"/>.</summary>
+    /// <summary>Initialises a new instance of <see cref="HumlNamingPolicy"/>.</summary>
     protected HumlNamingPolicy() { }
 
     /// <summary>When overridden in a derived class, converts the specified .NET property name

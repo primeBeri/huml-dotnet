@@ -170,6 +170,19 @@ public class HumlDeserializerTests
     }
 
     [Fact]
+    public void Deserialize_InitOnlyProperty_ExceptionCarriesColumnZero()
+    {
+        const string huml = """
+            Name: "test"
+            """;
+
+        var act = () => HumlDeserializer.Deserialize<InitOnlyPoco>(huml);
+
+        var ex = act.Should().Throw<HumlDeserializeException>().Which;
+        ex.Column.Should().Be(0);
+    }
+
+    [Fact]
     public void Deserialize_InitOnlyPropertyOnLineThree_ExceptionCarriesLine3()
     {
         const string huml = """

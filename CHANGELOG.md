@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 targeted HUML spec version (`0.2.x` → HUML v0.2, `0.3.x` → HUML v0.3).
 See [docs/versioning.md](docs/versioning.md) for the full policy.
 
+## [Unreleased]
+
+(no changes yet)
+
 ## [0.2.0-alpha.1] - 2026-05-03
 
 ### Added

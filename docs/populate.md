@@ -68,6 +68,7 @@ Huml.Populate("""
 
 | Exception                   | When thrown                                                              |
 | --------------------------- | ------------------------------------------------------------------------ |
+| `ArgumentNullException`     | `huml` string is `null`                                                  |
 | `ArgumentNullException`     | `existing` is `null`                                                     |
 | `ArgumentException`         | `T` is a value type (struct)                                             |
 | `HumlParseException`        | The HUML input is syntactically invalid                                  |
