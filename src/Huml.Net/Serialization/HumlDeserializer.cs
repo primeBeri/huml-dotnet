@@ -71,7 +71,8 @@ internal static class HumlDeserializer
                 "Populate<T> cannot populate a value type — use Deserialize<T> to create a new instance.",
                 nameof(existing));
 
-        // Guard: existing must not be null.
+        // Guard: existing must not be null (only reachable for reference types;
+        // the struct guard above already threw for value types).
         // NOTE: ArgumentNullException.ThrowIfNull is not available on netstandard2.1.
         if (existing is null)
             throw new ArgumentNullException(nameof(existing));
@@ -112,7 +113,7 @@ internal static class HumlDeserializer
             // Init-only properties cannot be set after construction (POP-09)
             if (descriptor.IsInitOnly)
                 throw new HumlDeserializeException(
-                    $"Property '{descriptor.Property.Name}' on type '{targetType.Name}' is init-only and cannot be deserialized.",
+                    $"Property '{descriptor.Property.Name}' on type '{targetType.Name}' is init-only and cannot be deserialised.",
                     mapping.Key,
                     line: mapping.Line);
 
@@ -150,7 +151,8 @@ internal static class HumlDeserializer
             }
             else
             {
-                // Complex node — route through DeserializeNode (picks up type-level + options converters).
+                // Complex node (HumlDocument, HumlInlineMapping, or HumlSequence) — route through
+                // DeserializeNode (picks up type-level + options converters).
                 // DeserializeNode calls DeserializeMappingEntries / DeserializeSequence, which create NEW
                 // objects — this naturally gives replace (not merge) semantics for collections (POP-05, POP-06).
                 deserializedValue = DeserializeNode(mapping.Value, descriptor.Property.PropertyType, options);
@@ -240,7 +242,7 @@ internal static class HumlDeserializer
             // Init-only properties cannot be set after construction
             if (descriptor.IsInitOnly)
                 throw new HumlDeserializeException(
-                    $"Property '{descriptor.Property.Name}' on type '{targetType.Name}' is init-only and cannot be deserialized.",
+                    $"Property '{descriptor.Property.Name}' on type '{targetType.Name}' is init-only and cannot be deserialised.",
                     mapping.Key,
                     line: mapping.Line);
 
