@@ -94,6 +94,31 @@ case HumlMapping { Value: HumlInlineMapping inline }:
 
 The distinction exists because `HumlDocument` is always the root node returned by `Huml.Parse()`, while `HumlInlineMapping` only appears as a value within a mapping.
 
+## Source Positions
+
+All AST nodes carry the source position of the opening token in the HUML document.
+
+| Property | Type  | Description                                     |
+| -------- | ----- | ----------------------------------------------- |
+| `Line`   | `int` | 1-based line number, or `0` if position unknown |
+| `Column` | `int` | 0-based column position, or `0` if unknown      |
+
+These properties are excluded from structural equality — two nodes representing the same value at different positions are still considered equal by `==`.
+
+```csharp
+HumlDocument doc = Huml.Parse(humlString);
+
+foreach (HumlNode entry in doc.Entries)
+{
+    if (entry is HumlMapping mapping)
+    {
+        Console.WriteLine($"Key '{mapping.Key}' at line {mapping.Line}, column {mapping.Column}");
+    }
+}
+```
+
+`HumlDeserializeException` uses the AST node position when reporting mapping failures, so the `Line` and `Column` properties on the exception reflect the source location of the problematic key.
+
 ## Parsing Options
 
 Pass `HumlOptions.AutoDetect` to read the spec version from the document header:

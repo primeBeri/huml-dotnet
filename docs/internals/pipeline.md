@@ -99,6 +99,8 @@ Key implementation details:
   floats, decimals, NaN/Inf, `null`, `IEnumerable`, `Dictionary`, and finally the POCO fallback.
 - **Key emission:** `AppendKey(sb, key)` calls `NeedsQuoting()` to decide between bare and quoted
   key syntax. `AppendEscapedString(sb, value)` handles escaping for string values.
+- **Converter dispatch:** Before built-in type dispatch, `SerializeValue()` checks for a property-level `[HumlConverter]` attribute, then a type-level `[HumlConverter]`, then `HumlOptions.Converters`. The first matching converter's `Write(HumlSerializerContext, value)` method is called.
+- **Enum serialisation:** Enum values are serialised as quoted strings. The name is resolved via `EnumNameCache` — honouring `[HumlEnumValue]` overrides and `HumlOptions.PropertyNamingPolicy` transforms.
 
 ## Deserialiser
 
@@ -111,8 +113,11 @@ Key implementation details:
 
 - **Dispatch:** `DeserializeNode()` is the central dispatch method; it pattern-matches on the
   concrete `HumlNode` subtype and delegates to type-specific helpers.
-- **POCO mapping:** Uses `PropertyDescriptor.GetDescriptors(type)` for case-sensitive key lookup.
+- **POCO mapping:** Uses `PropertyDescriptor.GetLookup(type, policy)` for O(1) dictionary key lookup keyed by the HUML key (after naming policy transform). The ordering array (`GetDescriptors`) is used only by the serialiser.
+- **Naming policy:** `HumlOptions.PropertyNamingPolicy` transforms .NET property names at descriptor build time. The resulting HUML key is used for both the serialised output and the deserialise lookup dictionary key, ensuring round-trip symmetry.
+- **Converter dispatch:** Before built-in type dispatch, `DeserializeNode()` checks for a property-level `[HumlConverter]` attribute, then a type-level `[HumlConverter]` attribute, then `HumlOptions.Converters`. The first matching converter's `Read(HumlNode)` method is called.
 - **Collection dispatch:** Handles `T[]`, `List<T>`, `IEnumerable<T>`, and `Dictionary<string,T>`.
+- **Populate path:** `Huml.Populate<T>()` reuses `PopulateMappingEntries()` — the same property-assignment logic as `Deserialize<T>()` but targeting an existing instance rather than a freshly constructed one. Only properties present in the HUML document are assigned.
 - **`init`-only properties:** Detected via the `IsInitOnly` flag on `PropertyDescriptor`. A
   `HumlDeserializeException` is thrown immediately if an `init`-only setter is encountered.
 

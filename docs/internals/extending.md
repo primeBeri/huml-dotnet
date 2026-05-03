@@ -89,6 +89,9 @@ currently handle (e.g. `DateTimeOffset`, `Guid`, or a new numeric type).
    a type that maps to a `HumlDocument` or `HumlSequence` node).
    File: `src/Huml.Net/Serialization/HumlDeserializer.cs`
 
+   Note: for truly custom type mapping, prefer implementing `HumlConverter<T>` rather than
+   modifying the deserialiser directly — see `docs/custom-converters.md`.
+
 3. Update consumer-facing type mapping documentation if a `docs/serialisation.md` guide exists.
 
 4. Add round-trip tests in `tests/Huml.Net.Tests/HumlStaticApiTests.cs` or a new test file.
