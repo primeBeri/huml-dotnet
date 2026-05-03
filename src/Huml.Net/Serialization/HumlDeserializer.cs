@@ -89,7 +89,76 @@ internal static class HumlDeserializer
     private static void PopulateMappingEntries(
         IReadOnlyList<HumlNode> entries, object existing, Type targetType, HumlOptions options)
     {
-        throw new NotSupportedException("PopulateMappingEntries not yet implemented.");
+        // NOTE: keep in sync with DeserializeMappingEntries — the converter dispatch block below
+        // is an intentional structural copy. If a bug is fixed in one, apply it to the other.
+
+        // No Activator.CreateInstance — use 'existing' directly.
+        // Get property lookup dictionary for the target type (O(1) key access).
+        var lookup = PropertyDescriptor.GetLookup(targetType, options.PropertyNamingPolicy);
+
+        // Map each HUML mapping entry to a property on the existing instance.
+        foreach (var entry in entries)
+        {
+            if (entry is not HumlMapping mapping)
+                continue;
+
+            // Find matching descriptor by HUML key (case-sensitive, O(1))
+            lookup.TryGetValue(mapping.Key, out PropertyDescriptor? descriptor);
+
+            // Unknown key — skip silently (forward compatibility, POP-04)
+            if (descriptor is null)
+                continue;
+
+            // Init-only properties cannot be set after construction (POP-09)
+            if (descriptor.IsInitOnly)
+                throw new HumlDeserializeException(
+                    $"Property '{descriptor.Property.Name}' on type '{targetType.Name}' is init-only and cannot be deserialized.",
+                    mapping.Key,
+                    line: mapping.Line);
+
+            // Read-only (no setter) — skip silently (POP-10)
+            if (descriptor.Property.SetMethod is null)
+                continue;
+
+            // Deserialize the value, with converter-first priority.
+            // NOTE: keep in sync with DeserializeMappingEntries converter dispatch block.
+            object? deserializedValue;
+            if (descriptor.Converter != null)
+            {
+                // Property-level [HumlConverter] — highest priority, overrides type-level and options (POP-12)
+                deserializedValue = descriptor.Converter.ReadObject(mapping.Value);
+                ThrowIfNullForNonNullable(
+                    deserializedValue,
+                    descriptor.Property.PropertyType,
+                    mapping.Key,
+                    GetNodeLine(mapping.Value));
+            }
+            else if (ConverterCache.TryGet(descriptor.Property.PropertyType, options) is { } propConverter)
+            {
+                // Type-level or options-level converter for this property's type (POP-12)
+                deserializedValue = propConverter.ReadObject(mapping.Value);
+                ThrowIfNullForNonNullable(
+                    deserializedValue,
+                    descriptor.Property.PropertyType,
+                    mapping.Key,
+                    GetNodeLine(mapping.Value));
+            }
+            else if (mapping.Value is HumlScalar s)
+            {
+                // Direct scalar coercion — includes key in diagnostic exception
+                deserializedValue = CoerceScalar(s, descriptor.Property.PropertyType, mapping.Key, s.Line, options);
+            }
+            else
+            {
+                // Complex node — route through DeserializeNode (picks up type-level + options converters).
+                // DeserializeNode calls DeserializeMappingEntries / DeserializeSequence, which create NEW
+                // objects — this naturally gives replace (not merge) semantics for collections (POP-05, POP-06).
+                deserializedValue = DeserializeNode(mapping.Value, descriptor.Property.PropertyType, options);
+            }
+
+            // Overlay: set property value on the existing instance (POP-03)
+            descriptor.Property.SetValue(existing, deserializedValue);
+        }
     }
 
     // ── Core dispatch ─────────────────────────────────────────────────────────
