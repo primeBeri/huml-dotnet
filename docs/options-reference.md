@@ -13,14 +13,16 @@ All properties use `init`-only setters, making instances immutable after constru
 | `UnknownVersionBehaviour` | `UnknownVersionBehaviour` | `Throw`     | `Throw`, `UseLatest`, `UsePrevious` | What happens when a `%HUML` header declares an unrecognised version                                                        |
 | `CollectionFormat`        | `CollectionFormat`        | `Multiline` | `Multiline`, `Inline`               | Global default for collection serialisation format; per-property override via `[HumlProperty(Inline = InlineMode.Inline)]` |
 | `MaxRecursionDepth`       | `int`                     | `64`        | `1`–`1024`                          | Max nesting depth before `HumlParseException` is thrown                                                                    |
+| `PropertyNamingPolicy` | `HumlNamingPolicy?`    | `null`  | `null` or any `HumlNamingPolicy` instance | Converts .NET property names to HUML keys during serialisation and deserialisation. `null` = property name used as-is. Built-ins: `HumlNamingPolicy.KebabCase`, `SnakeCase`, `CamelCase`, `PascalCase`. A `[HumlProperty]` name override always takes precedence. |
+| `Converters`           | `IList<HumlConverter>` | `[]`    | any list of `HumlConverter` instances     | Custom converters consulted during serialisation and deserialisation when no `[HumlConverter]` attribute is present. First converter whose `CanConvert` returns `true` wins. Do not modify this list after passing options to any `Huml.*` method.                    |
 
 ## Convenience Instances
 
-| Instance                      | SpecVersion | VersionSource | UnknownVersionBehaviour | CollectionFormat | MaxRecursionDepth |
-| ----------------------------- | ----------- | ------------- | ----------------------- | ---------------- | ----------------- |
-| `HumlOptions.Default`         | V0_2        | Header        | Throw                   | Multiline        | 64                |
-| `HumlOptions.LatestSupported` | V0_2        | Options       | Throw                   | Multiline        | 64                |
-| `HumlOptions.AutoDetect`      | V0_2        | Header        | Throw                   | Multiline        | 64                |
+| Instance                      | SpecVersion | VersionSource | UnknownVersionBehaviour | CollectionFormat | MaxRecursionDepth | PropertyNamingPolicy | Converters |
+| ----------------------------- | ----------- | ------------- | ----------------------- | ---------------- | ----------------- | -------------------- | ---------- |
+| `HumlOptions.Default`         | V0_2        | Header        | Throw                   | Multiline        | 64                | null                 | []         |
+| `HumlOptions.LatestSupported` | V0_2        | Options       | Throw                   | Multiline        | 64                | null                 | []         |
+| `HumlOptions.AutoDetect`      | V0_2        | Header        | Throw                   | Multiline        | 64                | null                 | []         |
 
 `HumlOptions.Default` reads the `%HUML vX.Y.Z` header from the document to determine the spec version.
 If no header is present, it falls back to `V0_2`. `HumlOptions.AutoDetect` is a reference-equal alias for `Default`.
@@ -53,3 +55,5 @@ var result3 = Huml.Deserialize<MyDto>(humlText, HumlOptions.LatestSupported);
 - Passing `null` for `options` in any `Huml.*` method is equivalent to passing `HumlOptions.Default` (header-aware auto-detect).
 - `MaxRecursionDepth` throws `ArgumentOutOfRangeException` at construction time if the value is outside `[1, 1024]`.
 - `CollectionFormat.Inline` is silently ignored for collection properties that contain non-scalar items — those always emit in multiline format.
+- `PropertyNamingPolicy` applies only to .NET property names — it does not affect `Dictionary<string, T>` string keys or `[HumlProperty]` explicit names.
+- The `Converters` list is checked in order; the first converter whose `CanConvert(type)` returns `true` is used. A property-level or type-level `[HumlConverter]` attribute always takes precedence over `Converters`.
