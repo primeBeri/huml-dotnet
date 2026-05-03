@@ -97,7 +97,13 @@ public static class Huml
     /// <exception cref="HumlParseException">Thrown when the HUML input is invalid.</exception>
     /// <exception cref="HumlDeserializeException">Thrown when mapping to <typeparamref name="T"/> fails.</exception>
     public static void Populate<T>(string huml, T existing, HumlOptions? options = null)
-        => Populate<T>(huml.AsSpan(), existing, options);
+    {
+        // NOTE: ArgumentNullException.ThrowIfNull is not available on netstandard2.1.
+#pragma warning disable CA1510 // ThrowIfNull is .NET 6+; library targets netstandard2.1
+        if (huml is null) throw new ArgumentNullException(nameof(huml));
+#pragma warning restore CA1510
+        Populate<T>(huml.AsSpan(), existing, options);
+    }
 
     /// <summary>
     /// Populates an existing instance of <typeparamref name="T"/> with values deserialised
