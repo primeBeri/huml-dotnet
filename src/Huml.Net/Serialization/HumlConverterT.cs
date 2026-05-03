@@ -35,5 +35,15 @@ public abstract class HumlConverter<T> : HumlConverter
 
     internal override object? ReadObject(HumlNode node) => Read(node);
     internal override void WriteObject(HumlSerializerContext context, object? value)
-        => Write(context, (T)value!);
+    {
+        if (value is null)
+        {
+            if (typeof(T).IsValueType && Nullable.GetUnderlyingType(typeof(T)) == null)
+                throw new InvalidOperationException(
+                    $"Converter '{GetType().Name}' received a null value for non-nullable value type '{typeof(T).Name}'.");
+            Write(context, default!);
+            return;
+        }
+        Write(context, (T)value);
+    }
 }

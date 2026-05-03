@@ -111,9 +111,10 @@ internal sealed record PropertyDescriptor(
                 HumlConverter? converter = null;
                 if (converterAttr != null)
                 {
+                    object? instance;
                     try
                     {
-                        converter = (HumlConverter)Activator.CreateInstance(converterAttr.ConverterType)!;
+                        instance = Activator.CreateInstance(converterAttr.ConverterType);
                     }
                     catch (MissingMethodException)
                     {
@@ -121,8 +122,8 @@ internal sealed record PropertyDescriptor(
                             $"Converter type '{converterAttr.ConverterType.Name}' has no accessible " +
                             "parameterless constructor.");
                     }
-                    if (converter is not HumlConverter)
-                        throw new InvalidOperationException(
+                    converter = instance as HumlConverter
+                        ?? throw new InvalidOperationException(
                             $"Converter type '{converterAttr.ConverterType.Name}' does not derive from HumlConverter.");
                 }
 

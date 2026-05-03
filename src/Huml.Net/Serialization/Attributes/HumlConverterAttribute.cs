@@ -24,5 +24,11 @@ public sealed class HumlConverterAttribute : Attribute
     /// <param name="converterType">
     /// The converter type. Must derive from <see cref="HumlConverter"/>.
     /// </param>
-    public HumlConverterAttribute(Type converterType) => ConverterType = converterType;
+    public HumlConverterAttribute(Type converterType)
+    {
+#pragma warning disable CA1510 // ThrowIfNull is .NET 6+; library targets netstandard2.1
+        if (converterType is null) throw new ArgumentNullException(nameof(converterType));
+#pragma warning restore CA1510
+        ConverterType = converterType;
+    }
 }

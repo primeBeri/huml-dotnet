@@ -40,8 +40,13 @@ public sealed class HumlSerializerContext
     /// Appends a raw HUML fragment verbatim. Use when the converter produces custom HUML
     /// syntax that cannot be expressed through <see cref="AppendSerializedValue"/>.
     /// </summary>
-    /// <param name="huml">A raw HUML string fragment. Must be trusted content; untrusted
-    /// input can produce malformed HUML.</param>
+    /// <param name="huml">
+    /// A raw HUML fragment appended verbatim. The caller is responsible for ensuring
+    /// correctness. Any embedded newline will break the current mapping or sequence entry;
+    /// a stray <c>::</c> suffix will open an unmatched block. Only use this method when
+    /// <see cref="AppendSerializedValue"/> is insufficient and the output is fully under
+    /// the converter's control.
+    /// </param>
     public void AppendRaw(string huml) => _sb.Append(huml);
 
     /// <summary>

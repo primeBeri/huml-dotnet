@@ -261,12 +261,10 @@ public class HumlConverterTests
     }
 
     [Fact]
-    public void Converter_ReturningNull_ThrowsForNonNullableValueType()
+    public void ConverterRead_ThrowingHumlDeserializeException_PropagatesCorrectly()
     {
-        // Verify that when a converter's Read method throws HumlDeserializeException
-        // (e.g., wrong scalar kind received), the exception propagates correctly.
-        // PointConverter.Read checks for ScalarKind.String and throws HumlDeserializeException
-        // when given an integer scalar — testing the error path through converter dispatch.
+        // PointConverter.Read validates ScalarKind.String and throws HumlDeserializeException
+        // when given an integer scalar — verifies the exception propagates through converter dispatch.
         var huml = "%HUML v0.2.0\nLocation: 42\n";
         var act = () => Huml.Deserialize<PointPropPoco>(huml, HumlOptions.Default);
         act.Should().Throw<HumlDeserializeException>();

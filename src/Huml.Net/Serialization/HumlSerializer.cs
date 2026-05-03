@@ -265,7 +265,7 @@ internal static class HumlSerializer
                 sb.Append(indent);
                 AppendKey(sb, key);
                 sb.Append(": ");
-                var ctx = new HumlSerializerContext(sb, depth + 1, options);
+                var ctx = new HumlSerializerContext(sb, depth, options);
                 converterOverride.WriteObject(ctx, value);
                 sb.Append('\n');
             }
